@@ -21,8 +21,7 @@ Additional options for rsync can be append to the command.
 ## Installation
 
 ```
-git clone 
-
+git clone https://github.com/Solamil/rsync-script
 cd rsync-script/
 ```
 
@@ -30,7 +29,6 @@ Configure file `rsync-script.sh` to fit a particular environment(HOSTS, dirs, fi
 
 ```
 make install
-
 ```
 
 ## Customization 
