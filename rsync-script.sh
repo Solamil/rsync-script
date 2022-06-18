@@ -114,7 +114,7 @@ sync_remote_individual(){
 
 		ls) shift; { echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift
 				rsync_individual "$remote_dest:$src" "" "$@" ;;
-		*) die "Usage: $PROGRAM $COMMAND files|dirs|media|etc|[pull|push|ls|diff FILE|DIR] [RSYNCOPTIONS] "  ;;
+		*) die "Usage: $PROGRAM $COMMAND [files|dirs|media|etc pull|push]|[pull|push|ls|diff FILE|DIR] [RSYNCOPTIONS]"  ;;
 	esac
 }
 
