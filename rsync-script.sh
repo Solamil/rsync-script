@@ -72,6 +72,7 @@ rsync_etc(){
 rsync_dirs(){
 	local src=$1; shift; local dst=$1; shift; local args="$@"
 #	--backup-dir="/tmp/" \
+
 	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -rtvupRE --links $args --info=NAME1 -F \
 	$src/./{dl/,docs/,scripts/,pics/,devel/} \
 	$dst/
@@ -102,17 +103,17 @@ rsync_files(){
 sync_remote_individual(){
 #		pull) shift; rsync_individual "$remote_dest:$(pwd)/$1/" "$(pwd)/" "$@" ;;
 	case "$1" in
-		pull) shift; { echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift
+		pull) { echo "$2" | grep -q "^/"; } && src="$2" || src="$(pwd)/$2"; shift 2
 				rsync_individual "$remote_dest:$src" "$src" "$@" ;;
 
-		push) shift; { echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift
-				rsync_individual "$src" "$remote_dest:$src" "$@" ;;
+		push) { echo "$2" | grep -q "^/"; } && src="$2" || src="$(pwd)/$2"; shift 2
+		         rsync_individual "$src" "$remote_dest:$src" "$@" ;;
 
-		diff) shift; { echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift
+		diff) { echo "$2" | grep -q "^/"; } && src="$2" || src="$(pwd)/$2"; shift 2
 				rsync_individual "$remote_dest:$src" "$TMP_DIR$src" "--mkpath $@"
 				diff -s -u "$src" "$TMP_DIR$src" ;;
 
-		ls) shift; { echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift
+		ls) { echo "$2" | grep -q "^/"; } && src="$2" || src="$(pwd)/$2"; shift 2
 				rsync_individual "$remote_dest:$src" "" "$@" ;;
 		*) die "Usage: $PROGRAM $COMMAND [files|dirs|media|etc pull|push]|[pull|push|ls|diff FILE|DIR] [RSYNCOPTIONS]"  ;;
 	esac
