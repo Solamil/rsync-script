@@ -25,6 +25,25 @@ die(){
 	echo "$@" >&2
 	exit 1
 }
+set_remote_dest(){
+	if [[ -n $(echo "$1" | grep "@" ) ]]; then
+		echo "dfdsaf"
+		user=$( echo $1 | grep -o "[^@]*" | head -n 1 )
+		host=$( echo $1 | grep -o "[^@]*" | tail -n 1 )
+		remote_dest="$1"; shift;
+		remote_dest=$remote_dest":"
+	elif [[ $# -eq 0 || -z $(echo "$1" | grep "@" )  ]]; then
+		[[ -n $HOST_REMOTE_LIST ]] || die "Variable HOST_REMOTE_LIST is not defined."
+	#	VICE VERSA
+		user=$(whoami); host=$(cat /etc/hostname)
+		local src=$user"@"$host
+		[[ $src == ${HOST_REMOTE_LIST[0]} ]] && remote_dest=${HOST_REMOTE_LIST[1]} || remote_dest=${HOST_REMOTE_LIST[0]}
+		remote_dest=$remote_dest":"
+	elif [[ $1 == "local" ]]; then
+		remote_dest=""
+	fi
+
+}
 #
 # END platform definable
 #
@@ -292,16 +311,85 @@ cmd_rsync(){
 PROGRAM="${0##*/}"
 COMMAND="$1"
 
-case "$1" in
-	version|--version) shift; cmd_version "$@" ;;
-	help|--help) shift; cmd_usage "$@" ;;
-	[a-z]*@[a-z0-9.-]*) cmd_remote_neo "$@" ;;
-	remote) shift; cmd_remote "$@" ;;
-	local) shift; cmd_local "$@" ;;
-	portable) shift; cmd_portable "$@" ;;
-	test) shift; cmd_test "$@" ;;
-	*) cmd_rsync "$@" ;;
+# case "$1" in
+# 	version|--version) shift; cmd_version "$@" ;;
+# 	help|--help) shift; cmd_usage "$@" ;;
+# 	[a-z]*@[a-z0-9.-]*) cmd_remote_neo "$@" ;;
+# 	remote) shift; cmd_remote "$@" ;;
+# 	local) shift; cmd_local "$@" ;;
+# 	portable) shift; cmd_portable "$@" ;;
+# 	test) shift; cmd_test "$@" ;;
+# 	*) cmd_rsync "$@" ;;
+# 
+# esac
 
+cmd_tmp(){
+	{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift
+	set_remote_dest "$@"
+	local args="${RSYNC_COMPRESSION[@]} ${RSYNC_REMOTE_SHELL[@]} $@"
+	rsync_individual "$remote_dest$src" "$TMP_DIR$src" "--mkpath $args"
+}
+
+cmd_ls(){
+	if [[ $# -eq 0 ]]; then
+		src="$(pwd)/." 
+	else 
+		{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift
+	fi
+	set_remote_dest "$@"	
+	rsync_individual "$remote_dest$src" "" "$@"
+
+}
+
+cmd_diff(){
+	cmd_tmp "$@"
+	diff -u "$src" "$TMP_DIR$src"
+}
+
+cmd_files(){
+	set_remote_dest "$@"	
+
+	local args="${RSYNC_COMPRESSION[@]} ${RSYNC_REMOTE_SHELL[@]}"
+	case "$1" in
+		pull) shift; rsync_files "$remote_dest$HOME" "$HOME" "$args $@" ;;
+		push) shift; rsync_files "$HOME" "$remote_dest$HOME" "$args $@" ;;
+		*) die "Usage: $PROGRAM $COMMAND [USER@HOST] pull|push [RSYNCOPTIONS]"  ;;
+	esac
+
+}
+
+cmd_dirs(){
+	set_remote_dest "$@"	
+
+	local args="${RSYNC_COMPRESSION[@]} ${RSYNC_REMOTE_SHELL[@]}"
+
+	case "$1" in
+		pull) shift; rsync_dirs "$remote_dest$HOME" "$HOME" "$@" ;; 
+		push) shift; rsync_dirs "$HOME" "$remote_dest$HOME" "$@" ;;
+		*) die "Usage: $PROGRAM $COMMAND dirs pull|push [RSYNCOPTIONS]"  ;;
+	esac
+}
+
+cmd_media(){
+	set_remote_dest "$@"	
+	local args="${RSYNC_COMPRESSION[@]} ${RSYNC_REMOTE_SHELL[@]}"
+	case "$1" in
+		pull) shift; rsync_media "$remote_dest/media/$user/HardDrive" "/media/$user/HardDrive" "$@" ;;
+		push) shift; rsync_media "/media/$user/HardDrive" "$remote_dest/media/$user/HardDrive" "$@" ;; # Syncing it back
+		*) die "Usage: $PROGRAM $COMMAND [USER@HOST] pull|push [RSYNCOPTIONS]"  ;;
+	esac
+}
+
+case "$1" in
+ 	version|--version) shift; cmd_version "$@" ;;
+ 	help|--help) shift; cmd_usage "$@" ;;
+	tmp) shift; cmd_tmp "$@" ;;
+	diff) shift; cmd_diff "$@" ;;
+	"ls") shift; cmd_ls "$@" ;;
+	files) shift; cmd_files "$@" ;;
+	dirs) shift; cmd_dirs "$@" ;;
+	media) shift; cmd_media "$@" ;;
+	
 esac
 
 exit 0
