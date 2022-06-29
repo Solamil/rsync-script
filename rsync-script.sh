@@ -112,7 +112,7 @@ cmd_version(){
 	|								     |
 	|    rsync shell script for easier transfer files and directories    |
 	|								     |
-	| 			   version: v0.1			     |
+	| 			   version: v0.2			     |
 	|								     |
 	|			      Michal				     |
 	 --------------------------------------------------------------------
