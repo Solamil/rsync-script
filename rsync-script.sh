@@ -4,7 +4,7 @@
 #
 
 RSYNC="rsync"
-RSYNC_DEFAULT_OPTS=( --human-readable --progress )
+RSYNC_DEFAULT_OPTS=( --human-readable --progress --itemize-changes )
 RSYNC_REMOTE_SHELL=( -e ssh )
 RSYNC_COMPRESSION=( --compress --compress-choice=zstd --compress-level=22 )
 # RSYNC_OPTS=( --recursive --times --update --verbose  ) # not in use
@@ -26,22 +26,12 @@ die(){
 	exit 1
 }
 set_remote_dest(){
-	if [[ -n $(echo "$1" | grep "@" ) ]]; then
-		echo "dfdsaf"
-		user=$( echo $1 | grep -o "[^@]*" | head -n 1 )
-		host=$( echo $1 | grep -o "[^@]*" | tail -n 1 )
-		remote_dest="$1"; shift;
-		remote_dest=$remote_dest":"
-	elif [[ $# -eq 0 || -z $(echo "$1" | grep "@" )  ]]; then
-		[[ -n $HOST_REMOTE_LIST ]] || die "Variable HOST_REMOTE_LIST is not defined."
-	#	VICE VERSA
-		user=$(whoami); host=$(cat /etc/hostname)
-		local src=$user"@"$host
-		[[ $src == ${HOST_REMOTE_LIST[0]} ]] && remote_dest=${HOST_REMOTE_LIST[1]} || remote_dest=${HOST_REMOTE_LIST[0]}
-		remote_dest=$remote_dest":"
-	elif [[ $1 == "local" ]]; then
-		remote_dest=""
-	fi
+	[[ -n $HOST_REMOTE_LIST ]] || die "Variable HOST_REMOTE_LIST is not defined."
+#	VICE VERSA
+	user=$(whoami); host=$(cat /etc/hostname)
+	local src=$user"@"$host
+	[[ $src == ${HOST_REMOTE_LIST[0]} ]] && remote_dest=${HOST_REMOTE_LIST[1]} || remote_dest=${HOST_REMOTE_LIST[0]}
+	remote_dest=$remote_dest":"
 
 }
 #
@@ -54,8 +44,8 @@ set_remote_dest(){
 
 rsync_alone(){
 	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" \
-	-rtvcpRE \
 	"$@"
+#	-rtvcpRE \
 }
 
 rsync_individual(){
@@ -114,96 +104,7 @@ rsync_files(){
 #
 # END rsync functions
 #
-#
-# BEGIN sync functions
-#
 
-sync_remote_individual(){
-#		pull) shift; rsync_individual "$remote_dest:$(pwd)/$1/" "$(pwd)/" "$@" ;;
-	case "$1" in
-		pull) shift; { echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift
-				rsync_individual "$remote_dest:$src" "$src" "$@" ;;
-
-		push) shift; { echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift
-				rsync_individual "$src" "$remote_dest:$src" "$@" ;;
-
-		diff) shift; { echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift
-				rsync_individual "$remote_dest:$src" "$TMP_DIR$src" "--mkpath $@"
-				diff -s -u "$src" "$TMP_DIR$src" ;;
-
-		ls) shift; { echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift
-				rsync_individual "$remote_dest:$src" "" "$@" ;;
-		*) die "Usage: $PROGRAM $COMMAND [files|dirs|media|etc pull|push]|[pull|push|ls|diff FILE|DIR] [RSYNCOPTIONS]"  ;;
-	esac
-}
-
-sync_remote_etc(){
-	case "$1" in
-		pull) shift; rsync_etc "$remote_dest:/etc" "/etc" "$@" ;; 
-		push) shift; rsync_etc "/etc" "$remote_dest:/etc" "$@" ;;
-		*) die "Usage: $PROGRAM $COMMAND etc pull|push [RSYNCOPTIONS]"  ;;
-	esac
-}
-
-sync_remote_files(){
-	case "$1" in
-		pull) shift; rsync_files "$remote_dest:$HOME" "$HOME" "$@" ;;
-		push) shift; rsync_files "$HOME" "$remote_dest:$HOME" "$@" ;;
-		*) die "Usage: $PROGRAM $COMMAND files pull|push [RSYNCOPTIONS]"  ;;
-	esac
-}
-
-sync_remote_dirs(){
-	case "$1" in
-		pull) shift; rsync_dirs "$remote_dest:$HOME" "$HOME" "$@" ;; 
-		push) shift; rsync_dirs "$HOME" "$remote_dest:$HOME" "$@" ;;
-		*) die "Usage: $PROGRAM $COMMAND dirs pull|push [RSYNCOPTIONS]"  ;;
-	esac
-}
-
-sync_remote_media(){
-	case "$1" in
-		pull) shift; rsync_media "$remote_dest:/media/$user/HardDrive" "/media/$user/HardDrive" "$@" ;;
-		push) shift; rsync_media "/media/$user/HardDrive" "$remote_dest:/media/$user/HardDrive" "$@" ;; # Syncing it back
-		*) die "Usage: $PROGRAM $COMMAND media pull|push [RSYNCOPTIONS]"  ;;
-	esac
-}
-
-sync_portable_media(){
-	case "$1" in
-		pull) shift; rsync_media "/media/$user/ExtDrive" "/media/$user/HardDrive" "$@" ;;
-		push) shift; rsync_media "/media/$user/HardDrive" "/media/$user/ExtDrive" "$@" ;;
-		*) die "Usage: $PROGRAM $COMMAND media pull|push [RSYNCOPTIONS]"  ;;
-	esac
-}
-
-sync_portable_files(){
-	case "$1" in
-		pull) shift; rsync_files "$HOME/flashdrive/portable-home$HOME" "$HOME" "$@" ;;
-		push) shift; rsync_files "$HOME" "$HOME/flashdrive/portable-home$HOME" "$@" ;;
-		*) die "Usage: $PROGRAM $COMMAND files pull|push [RSYNCOPTIONS]"  ;;
-	esac
-}
-
-sync_local_files(){
-	case "$1" in
-		pull) shift; rsync_files "$HOME/data/portable-home/$host$HOME" "$HOME" "$@" ;;
-		push) shift; rsync_files "$HOME" "$HOME/data/portable-home/$host$HOME" "$@" ;;
-		*) die "Usage: $PROGRAM $COMMAND files pull|push [RSYNCOPTIONS]"  ;;
-	esac
-}
-
-#
-# END sync functions
-#
-
-#
-# END platform definable
-#
-
-#
-# BEGIN subcommand function
-# 
 cmd_version(){
 	cat <<-_EOF
 	 --------------------------------------------------------------------
@@ -217,20 +118,27 @@ cmd_version(){
 	 --------------------------------------------------------------------
 	_EOF
 }
+
 cmd_usage(){
 	cmd_version
 	echo
 	cat <<-_EOF
-	Usage: 	$PROGRAM remote|USER@HOST files|dirs|media|etc pull|push [RSYNCOPTIONS]
-	                Transfer what is defined in rsync_[files|dirs|media|etc]() functions.
-	        $PROGRAM remote|USER@HOST pull|push FILE|DIR [RSYNCOPTIONS]
-	        	Transfer FILE or DIR. 
-	        $PROGRAM remote|USER@HOST ls DIR [RSYNCOPTIONS]
+	Usage: 	$PROGRAM files [local] [portable] pull|push [RSYNCOPTIONS]
+	                Transfer specified in rsync_files() function.
+		$PROGRAM dirs [local] pull|push [RSYNCOPTIONS]
+	                Transfer specified in rsync_dirs() function.
+		$PROGRAM media [local] pull|push [RSYNCOPTIONS]
+	                Transfer specified in rsync_media() function.
+		$PROGRAM etc [local] pull|push [RSYNCOPTIONS]
+	                Transfer specified in rsync_etc() function.
+	        $PROGRAM ls [DIR] [RSYNCOPTIONS]
 	        	List directory contents on remote host.
-	        $PROGRAM remote|USER@HOST diff FILE [RSYNCOPTIONS]
-	        	Compare local and remote FILE.	
-	        $PROGRAM local media push|pull [RSYNCOPTIONS]
-	        	Transfer what is defined in rsync_media() function locally.
+	        $PROGRAM diff FILE [RSYNCOPTIONS]
+	        	Show diff between local and remote FILE.		
+		$PROGRAM FILE|DIR pull|push [RSYNCOPTIONS]
+			Transfer specified FILE or DIR.
+	        $PROGRAM tmp FILE [RSYNCOPTIONS]
+	        	Transfer FILE or DIR to TMP_DIR. 
 	        $PROGRAM help
 	        	Show this help text.
 	        $PROGRAM version
@@ -239,156 +147,127 @@ cmd_usage(){
 	_EOF
 }
 
-remote_catalog(){
-	case "$1" in
-		media) shift; sync_remote_media "$@" 			     "${RSYNC_REMOTE_SHELL[@]}" ;;
-		dirs) shift; sync_remote_dirs "$@" "${RSYNC_COMPRESSION[@]}" "${RSYNC_REMOTE_SHELL[@]}" ;;
-		files) shift; sync_remote_files "$@" "${RSYNC_COMPRESSION[@]}" "${RSYNC_REMOTE_SHELL[@]}" ;;
-		etc) shift; sync_remote_etc "$@" "${RSYNC_COMPRESSION[@]}" "${RSYNC_REMOTE_SHELL[@]}" ;;
-		*) sync_remote_individual "$@" "${RSYNC_COMPRESSION[@]}" "${RSYNC_REMOTE_SHELL[@]}" ;;
-	esac
-}
-cmd_remote(){
-	[[ -n $HOST_REMOTE_LIST ]] || die "Variable HOST_REMOTE_LIST is not defined."
-#	VICE VERSA
-	user=$(whoami); host=$(cat /etc/hostname)
-	local src=$user"@"$host
-	[[ $src == ${HOST_REMOTE_LIST[0]} ]] && remote_dest=${HOST_REMOTE_LIST[1]} || remote_dest=${HOST_REMOTE_LIST[0]}
-	remote_catalog "$@"
-}
-
-cmd_remote_neo(){
-	remote_dest="$1"; shift;
-	user=$( echo $remote_dest | grep -o "[^@]*" | head -n 1 )
-	host=$( echo $remote_dest | grep -o "[^@]*" | tail -n 1 )
-	remote_catalog "$@"
-}
-
-cmd_local(){
-	host=$(cat /etc/hostname)
-	case "$1" in 
-		files) shift; sync_local_files "$@" ;;
-	esac
-}
-cmd_portable(){
-#	mkdir -p $dst_hard
-	
-	user=$(whoami)
-	case "$1" in
-		wd) shift; sync_portable_media "$@" ;;
-		files) shift; sync_portable_files "$@" ;;
-		*) die "Incorrect command: $1"  ;;
-	esac
-#	mkdir -p $dst_flash
-#	rsync_files  "$HOME" "$dst_hard"
-#	rsync_files "$dst_hard$HOME" "$HOME"
-	
-#	rsync_files "$HOME" "$dst_flash"
-#	rsync_files "$dst_flash$HOME" "$HOME"
-
-}
-
-cmd_test(){
-	sync_local_files "$@"
-# 	-rtvucpRE
-#	-r --recursive recurse into directories	
-#	-t --times preserve modification times
-#	-u --update skip files that are newer on the receiver
-#	-c --checksum skip based on checksum, not mod-time & size
-# 	-p --perms preserve permissions
-#	-v --verbose
-#	-R --relative use relative path names	
-#	-E --executability preserve executability
-
-}
-
-cmd_rsync(){
-	rsync_alone "$@"
-}
-#
-# END subcommand functions 
-#
-PROGRAM="${0##*/}"
-COMMAND="$1"
-
-# case "$1" in
-# 	version|--version) shift; cmd_version "$@" ;;
-# 	help|--help) shift; cmd_usage "$@" ;;
-# 	[a-z]*@[a-z0-9.-]*) cmd_remote_neo "$@" ;;
-# 	remote) shift; cmd_remote "$@" ;;
-# 	local) shift; cmd_local "$@" ;;
-# 	portable) shift; cmd_portable "$@" ;;
-# 	test) shift; cmd_test "$@" ;;
-# 	*) cmd_rsync "$@" ;;
-# 
-# esac
-
 cmd_tmp(){
-	{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift
 	set_remote_dest "$@"
-	local args="${RSYNC_COMPRESSION[@]} ${RSYNC_REMOTE_SHELL[@]} $@"
-	rsync_individual "$remote_dest$src" "$TMP_DIR$src" "--mkpath $args"
+
+	{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift;
+	
+	local args="${RSYNC_REMOTE_SHELL[@]}"
+
+	rsync_individual "$remote_dest$src" "$TMP_DIR$src" "--mkpath $args $@"
+
+
 }
 
 cmd_ls(){
+	set_remote_dest "$@"	
+
 	if [[ $# -eq 0 ]]; then
 		src="$(pwd)/." 
 	else 
 		{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift
 	fi
-	set_remote_dest "$@"	
+
 	rsync_individual "$remote_dest$src" "" "$@"
 
 }
 
 cmd_diff(){
 	cmd_tmp "$@"
-	diff -u "$src" "$TMP_DIR$src"
+	diff -u --color=always "$src" "$TMP_DIR$src"
 }
 
 cmd_files(){
-	set_remote_dest "$@"	
+	case "$1" in
+		local) shift; remote_dest="$HOME/data/portable-home/$host" ;;
+		portable) shift; remote_dest="$HOME/flashdrive/portable-home" ;;
+		*) set_remote_dest "$@";
+		   local args="${RSYNC_REMOTE_SHELL[@]}" ;;
+	esac 
 
-	local args="${RSYNC_COMPRESSION[@]} ${RSYNC_REMOTE_SHELL[@]}"
 	case "$1" in
 		pull) shift; rsync_files "$remote_dest$HOME" "$HOME" "$args $@" ;;
 		push) shift; rsync_files "$HOME" "$remote_dest$HOME" "$args $@" ;;
-		*) die "Usage: $PROGRAM $COMMAND [USER@HOST] pull|push [RSYNCOPTIONS]"  ;;
+		*) die "Usage: $PROGRAM $COMMAND [local] pull|push [RSYNCOPTIONS]"  ;;
 	esac
+
 
 }
 
 cmd_dirs(){
 	set_remote_dest "$@"	
 
-	local args="${RSYNC_COMPRESSION[@]} ${RSYNC_REMOTE_SHELL[@]}"
+	local args="${RSYNC_REMOTE_SHELL[@]}"
 
 	case "$1" in
 		pull) shift; rsync_dirs "$remote_dest$HOME" "$HOME" "$@" ;; 
 		push) shift; rsync_dirs "$HOME" "$remote_dest$HOME" "$@" ;;
-		*) die "Usage: $PROGRAM $COMMAND dirs pull|push [RSYNCOPTIONS]"  ;;
-	esac
-}
-
-cmd_media(){
-	set_remote_dest "$@"	
-	local args="${RSYNC_COMPRESSION[@]} ${RSYNC_REMOTE_SHELL[@]}"
-	case "$1" in
-		pull) shift; rsync_media "$remote_dest/media/$user/HardDrive" "/media/$user/HardDrive" "$@" ;;
-		push) shift; rsync_media "/media/$user/HardDrive" "$remote_dest/media/$user/HardDrive" "$@" ;; # Syncing it back
 		*) die "Usage: $PROGRAM $COMMAND [USER@HOST] pull|push [RSYNCOPTIONS]"  ;;
 	esac
 }
 
+cmd_etc(){
+	set_remote_dest "$@"
+	
+	case "$1" in
+		pull) shift; rsync_etc "$remote_dest/etc" "/etc" "$@" ;; 
+		push) shift; rsync_etc "/etc" "$remote_dest/etc" "$@" ;;
+		*) die "Usage: $PROGRAM $COMMAND pull|push [RSYNCOPTIONS]"  ;;
+	esac
+}
+
+cmd_media(){
+	set_remote_dest "$@"
+
+	hardrive="/media/$user/HardDrive"
+	local src=$hardrive dest=$remote_dest$hardrive
+	case "$1" in
+		local) shift; dest="/media/$user/ExtDrive" ;;
+		*) local args="${RSYNC_REMOTE_SHELL[@]}"
+	esac 
+	
+	case "$1" in
+		pull) shift; local SRC="$dest" DEST="$src" ;;
+		push) shift; local SRC="$src" DEST="$dest" ;; # Syncing it back
+		*) die "Usage: $PROGRAM $COMMAND [local] pull|push [RSYNCOPTIONS]"  ;;
+	esac
+	rsync_media $SRC $DEST "$args $@"
+}
+
+cmd_individual(){
+	[[ $# -eq 0 ]] && { cmd_usage; exit 0; }
+
+
+	COMMAND="FILE"
+	{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1";
+	set_remote_dest "$@"
+	case "$2" in
+		pull) shift 2; rsync_individual "$remote_dest$src" "$src" "$@"; return ;;
+		push) shift 2; rsync_individual "$src" "$remote_dest$src" "$@"; return ;;
+		*) die "Usage: $PROGRAM $COMMAND pull|push [RSYNCOPTIONS]"  ;;
+	esac
+
+	rsync_alone "$@"
+}
+
+#
+# END subcommand section    
+#
+
+PROGRAM="${0##*/}"
+COMMAND="$1"
+
 case "$1" in
  	version|--version) shift; cmd_version "$@" ;;
  	help|--help) shift; cmd_usage "$@" ;;
+	etc) shift; cmd_etc "$@" ;;
 	tmp) shift; cmd_tmp "$@" ;;
 	diff) shift; cmd_diff "$@" ;;
 	"ls") shift; cmd_ls "$@" ;;
 	files) shift; cmd_files "$@" ;;
 	dirs) shift; cmd_dirs "$@" ;;
 	media) shift; cmd_media "$@" ;;
+	*) cmd_individual "$@" ;;
 	
 esac
 
