@@ -48,20 +48,26 @@ Mainly list of directories should be changed to fit to a particular environment.
 ## Usage
 
 ```
-Usage:  rs remote|USER@HOST files|dirs|media|etc pull|push [RSYNCOPTIONS]
-                Transfer what is defined in rsync_[files|dirs|media|etc]() functions.
-        rs remote|USER@HOST pull|push FILE|DIR [RSYNCOPTIONS]
-                Transfer FILE or DIR.
-        rs remote|USER@HOST ls DIR [RSYNCOPTIONS]
-                List directory contents on remote host.
-        rs remote|USER@HOST diff FILE [RSYNCOPTIONS]
-                Compare local and remote FILE.
-        rs local media push|pull [RSYNCOPTIONS]
-                Transfer what is defined in rsync_media() function locally.
-        rs help
-                Show this help text.
-        rs version
-                Show version information.
+Usage: 	$PROGRAM files [local] [portable] pull|push [RSYNCOPTIONS]
+		Transfer specified in rsync_files() function.
+	$PROGRAM dirs [local] pull|push [RSYNCOPTIONS]
+		Transfer specified in rsync_dirs() function.
+	$PROGRAM media [local] pull|push [RSYNCOPTIONS]
+		Transfer specified in rsync_media() function.
+	$PROGRAM etc [local] pull|push [RSYNCOPTIONS]
+		Transfer specified in rsync_etc() function.
+	$PROGRAM ls [DIR] [RSYNCOPTIONS]
+		List directory contents on remote host.
+	$PROGRAM diff FILE [RSYNCOPTIONS]
+		Show diff between local and remote FILE.		
+	$PROGRAM FILE|DIR pull|push [RSYNCOPTIONS]
+		Transfer specified FILE or DIR.
+	$PROGRAM tmp FILE [RSYNCOPTIONS]
+		Transfer FILE or DIR to TMP_DIR. 
+	$PROGRAM help
+		Show this help text.
+	$PROGRAM version
+		Show version information.
 
 ```
 
