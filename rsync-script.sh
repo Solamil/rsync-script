@@ -34,6 +34,14 @@ set_remote_dest(){
 	remote_dest=$remote_dest":"
 
 }
+diff_files(){
+	prefix=$1	 
+	remote_files=$(find $TMP_DIR$prefix -name "*" -type f)
+	for i in $remote_files; do
+		file=${i#$TMP_DIR}
+		diff --color=auto "$i" "$file"
+	done
+}
 #
 # END platform definable
 #
@@ -58,7 +66,6 @@ rsync_individual(){
 
 rsync_media(){
 	local src=$1; shift; local dst=$1; shift; local args="$@"
-
 	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -rtvpR --ignore-existing $args \
 	"${RSYNC_GLOBAL_FILTER[@]}" \
 	$src/./{Movies/,Music/,docs/,Phone/} \
@@ -70,7 +77,6 @@ rsync_media(){
 
 rsync_etc(){
 	local src=$1; shift; local dst=$1; shift; local args="$@"
-
 	sudo $RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -rtvupRE --links $args \
 	$src/./{sudoers,locale.gen,locale.conf,pacman.d/hooks/} \
 	$src/./ssh/sshd_config \
@@ -92,7 +98,7 @@ rsync_dirs(){
 rsync_files(){
 	local src=$1; shift; local dst=$1; shift; local args="$@"
 
-	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -rtvupRE --links $args --info=NAME1 -F \
+	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -rtvupRE --links "${args[@]}" --info=NAME1 -F \
 	$src/./{.bitmonero/,.imwheelrc} \
 	$src/./{.config/,scripts/,.local/share/} \
 	$dst/
@@ -174,7 +180,7 @@ cmd_ls(){
 
 cmd_diff(){
 	cmd_tmp "$@"
-	diff -u --color=always "$src" "$TMP_DIR$src"
+	diff --color=always "$src" "$TMP_DIR$src"
 }
 
 cmd_files(){
@@ -184,11 +190,11 @@ cmd_files(){
 		*) set_remote_dest "$@";
 		   local args="${RSYNC_REMOTE_SHELL[@]}" ;;
 	esac 
-
 	case "$1" in
 		pull) shift; rsync_files "$remote_dest$HOME" "$HOME" "$args $@" ;;
 		push) shift; rsync_files "$HOME" "$remote_dest$HOME" "$args $@" ;;
-		*) die "Usage: $PROGRAM $COMMAND [local] pull|push [RSYNCOPTIONS]"  ;;
+		diff) shift; rsync_files "$remote_dest$HOME" "$TMP_DIR$HOME" "--mkpath --compare-dest="$HOME/" $args $@"; diff_files "$HOME" ;;
+		*) die "Usage: $PROGRAM $COMMAND [local] pull|push|diff [RSYNCOPTIONS]"  ;;
 	esac
 
 
@@ -202,7 +208,7 @@ cmd_dirs(){
 	case "$1" in
 		pull) shift; rsync_dirs "$remote_dest$HOME" "$HOME" "$@" ;; 
 		push) shift; rsync_dirs "$HOME" "$remote_dest$HOME" "$@" ;;
-		*) die "Usage: $PROGRAM $COMMAND [USER@HOST] pull|push [RSYNCOPTIONS]"  ;;
+		*) die "Usage: $PROGRAM $COMMAND pull|push [RSYNCOPTIONS]"  ;;
 	esac
 }
 
@@ -220,10 +226,12 @@ cmd_media(){
 	set_remote_dest "$@"
 
 	hardrive="/media/$user/HardDrive"
-	local src=$hardrive dest=$remote_dest$hardrive
+	local src=$hardrive 
+	local dest=$remote_dest$hardrive
+
 	case "$1" in
 		local) shift; dest="/media/$user/ExtDrive" ;;
-		*) local args="${RSYNC_REMOTE_SHELL[@]}"
+		*) local args="${RSYNC_REMOTE_SHELL[@]}" ;;
 	esac 
 	
 	case "$1" in
@@ -231,6 +239,7 @@ cmd_media(){
 		push) shift; local SRC="$src" DEST="$dest" ;; # Syncing it back
 		*) die "Usage: $PROGRAM $COMMAND [local] pull|push [RSYNCOPTIONS]"  ;;
 	esac
+	echo $args $@
 	rsync_media $SRC $DEST "$args $@"
 }
 
