@@ -143,8 +143,6 @@ cmd_usage(){
 	        	Show diff between local and remote FILE.		
 		$PROGRAM FILE|DIR pull|push [RSYNCOPTIONS]
 			Transfer specified FILE or DIR.
-	        $PROGRAM tmp FILE [RSYNCOPTIONS]
-	        	Transfer FILE or DIR to TMP_DIR. 
 	        $PROGRAM help
 	        	Show this help text.
 	        $PROGRAM version
@@ -270,7 +268,6 @@ case "$1" in
  	version|--version) shift; cmd_version "$@" ;;
  	help|--help) shift; cmd_usage "$@" ;;
 	etc) shift; cmd_etc "$@" ;;
-	tmp) shift; cmd_tmp "$@" ;;
 	diff) shift; cmd_diff "$@" ;;
 	"ls") shift; cmd_ls "$@" ;;
 	files) shift; cmd_files "$@" ;;
