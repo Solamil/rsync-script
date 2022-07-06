@@ -5,8 +5,8 @@
 
 RSYNC="rsync"
 RSYNC_DEFAULT_OPTS=( --human-readable --progress --itemize-changes )
-RSYNC_REMOTE_SHELL=( -e ssh )
 RSYNC_COMPRESSION=( --compress --compress-choice=zstd --compress-level=22 )
+RSYNC_RSH=( "ssh -T -o Compression=no -x" )
 # RSYNC_OPTS=( --recursive --times --update --verbose  ) # not in use
 RSYNC_CONF_DIR="$XDG_CONFIG_HOME/rsync"
 GLOBAL_FILTER="$RSYNC_CONF_DIR/global-filter"
@@ -51,7 +51,7 @@ diff_files(){
 #
 
 rsync_alone(){
-	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" \
+	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
 	"$@"
 #	-rtvcpRE \
 }
@@ -59,14 +59,16 @@ rsync_alone(){
 rsync_individual(){
 	local src=$1; shift; local dst=$1; shift; local args="$@"
 #	PUSH without /
-	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -tvupE $args \
+	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
+	-tvupE ${args[@]} \
 	$src $dst
 	
 }
 
 rsync_media(){
 	local src=$1; shift; local dst=$1; shift; local args="$@"
-	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -rtvpR --ignore-existing $args \
+	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
+	-rtvpR --ignore-existing ${args[@]} \
 	"${RSYNC_GLOBAL_FILTER[@]}" \
 	$src/./{Movies/,Music/,docs/,Phone/} \
 	$dst/
@@ -77,7 +79,8 @@ rsync_media(){
 
 rsync_etc(){
 	local src=$1; shift; local dst=$1; shift; local args="$@"
-	sudo $RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -rtvupRE --links $args \
+	sudo $RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
+	-rtvupRE --links ${args[@]} \
 	$src/./{sudoers,locale.gen,locale.conf,pacman.d/hooks/} \
 	$src/./ssh/sshd_config \
 	$dst/
@@ -87,7 +90,8 @@ rsync_etc(){
 rsync_dirs(){
 	local src=$1; shift; local dst=$1; shift; local args="$@"
 #	--backup-dir="/tmp/" \
-	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -rtvupRE --links $args --info=NAME1 -F \
+	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
+	-rtvupRE --links ${args[@]} --info=NAME1 -F \
 	$src/./{dl/,docs/,scripts/,pics/,devel/} \
 	$dst/
 
@@ -98,7 +102,8 @@ rsync_dirs(){
 rsync_files(){
 	local src=$1; shift; local dst=$1; shift; local args="$@"
 
-	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -rtvupRE --links "${args[@]}" --info=NAME1 -F \
+	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
+	-rtvupRE --links ${args[@]} --info=NAME1 -F \
 	$src/./{.bitmonero/,.imwheelrc} \
 	$src/./{.config/,scripts/,.local/share/} \
 	$dst/
@@ -156,9 +161,7 @@ cmd_tmp(){
 
 	{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift;
 	
-	local args="${RSYNC_REMOTE_SHELL[@]}"
-
-	rsync_individual "$remote_dest$src" "$TMP_DIR$src" "--mkpath $args $@"
+	rsync_individual "$remote_dest$src" "$TMP_DIR$src" "--mkpath $@"
 
 
 }
@@ -185,13 +188,12 @@ cmd_files(){
 	case "$1" in
 		local) shift; remote_dest="$HOME/data/portable-home/$host" ;;
 		portable) shift; remote_dest="$HOME/flashdrive/portable-home" ;;
-		*) set_remote_dest "$@";
-		   local args="${RSYNC_REMOTE_SHELL[@]}" ;;
+		*) set_remote_dest "$@"; ;;
 	esac 
 	case "$1" in
-		pull) shift; rsync_files "$remote_dest$HOME" "$HOME" "$args $@" ;;
-		push) shift; rsync_files "$HOME" "$remote_dest$HOME" "$args $@" ;;
-		diff) shift; rsync_files "$remote_dest$HOME" "$TMP_DIR$HOME" "--mkpath --compare-dest="$HOME/" $args $@"; diff_files "$HOME" ;;
+		pull) shift; rsync_files "$remote_dest$HOME" "$HOME" "$@" ;;
+		push) shift; rsync_files "$HOME" "$remote_dest$HOME" "$@" ;;
+		diff) shift; rsync_files "$remote_dest$HOME" "$TMP_DIR$HOME" "--mkpath --compare-dest="$HOME/" $@"; diff_files "$HOME" ;;
 		*) die "Usage: $PROGRAM $COMMAND [local] pull|push|diff [RSYNCOPTIONS]"  ;;
 	esac
 
@@ -200,8 +202,6 @@ cmd_files(){
 
 cmd_dirs(){
 	set_remote_dest "$@"	
-
-	local args="${RSYNC_REMOTE_SHELL[@]}"
 
 	case "$1" in
 		pull) shift; rsync_dirs "$remote_dest$HOME" "$HOME" "$@" ;; 
@@ -229,7 +229,6 @@ cmd_media(){
 
 	case "$1" in
 		local) shift; dest="/media/$user/ExtDrive" ;;
-		*) local args="${RSYNC_REMOTE_SHELL[@]}" ;;
 	esac 
 	
 	case "$1" in
@@ -237,8 +236,7 @@ cmd_media(){
 		push) shift; local SRC="$src" DEST="$dest" ;; # Syncing it back
 		*) die "Usage: $PROGRAM $COMMAND [local] pull|push [RSYNCOPTIONS]"  ;;
 	esac
-	echo $args $@
-	rsync_media $SRC $DEST "$args $@"
+	rsync_media $SRC $DEST "$@"
 }
 
 cmd_individual(){
