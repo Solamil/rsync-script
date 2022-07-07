@@ -245,6 +245,8 @@ cmd_individual(){
 
 	COMMAND="FILE"
 	{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1";
+	[[ -d $src ]] && { echo "$1" | grep -vq "/$"; } && src=$src"/"
+
 	set_remote_dest "$@"
 	case "$2" in
 		pull) shift 2; rsync_individual "$remote_dest$src" "$src" "$@"; return ;;
