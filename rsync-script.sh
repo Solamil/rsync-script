@@ -57,7 +57,7 @@ rsync_alone(){
 }
 
 rsync_individual(){
-	local src=$1; shift; local dst=$1; shift; local args="$@"
+	local src=$1 dst=$2; shift 2; local args="$@"
 #	PUSH without /
 	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
 	-tvupE ${args[@]} \
@@ -66,7 +66,7 @@ rsync_individual(){
 }
 
 rsync_media(){
-	local src=$1; shift; local dst=$1; shift; local args="$@"
+	local src=$1 dst=$2; shift 2; local args="$@"
 	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
 	-rtvpR --ignore-existing ${args[@]} \
 	"${RSYNC_GLOBAL_FILTER[@]}" \
@@ -78,7 +78,7 @@ rsync_media(){
 }
 
 rsync_etc(){
-	local src=$1; shift; local dst=$1; shift; local args="$@"
+	local src=$1 dst=$2; shift 2; local args="$@"
 	sudo $RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
 	-rtvupRE --links ${args[@]} \
 	$src/./{sudoers,locale.gen,locale.conf,pacman.d/hooks/} \
@@ -88,7 +88,7 @@ rsync_etc(){
 }
 
 rsync_dirs(){
-	local src=$1; shift; local dst=$1; shift; local args="$@"
+	local src=$1 dst=$2; shift 2; local args="$@"
 #	--backup-dir="/tmp/" \
 	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
 	-rtvupRE --links ${args[@]} --info=NAME1 -F \
@@ -100,7 +100,7 @@ rsync_dirs(){
 }
 
 rsync_files(){
-	local src=$1; shift; local dst=$1; shift; local args="$@"
+	local src=$1 dst=$2; shift 2; local args="$@"
 
 	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
 	-rtvupRE --links ${args[@]} --info=NAME1 -F \
