@@ -190,11 +190,12 @@ cmd_files(){
 		portable) shift; remote_dest="$HOME/flashdrive/portable-home" ;;
 		*) set_remote_dest "$@"; ;;
 	esac 
+
 	case "$1" in
 		pull) shift; rsync_files "$remote_dest$HOME" "$HOME" "$@" ;;
 		push) shift; rsync_files "$HOME" "$remote_dest$HOME" "$@" ;;
 		diff) shift; rsync_files "$remote_dest$HOME" "$TMP_DIR$HOME" "--mkpath --compare-dest="$HOME/" $@"; diff_files "$HOME" ;;
-		*) die "Usage: $PROGRAM $COMMAND [local] pull|push|diff [RSYNCOPTIONS]"  ;;
+		*) die "Usage: $PROGRAM $COMMAND [local] [portable] pull|push|diff [RSYNCOPTIONS]"  ;;
 	esac
 
 
@@ -202,11 +203,14 @@ cmd_files(){
 
 cmd_dirs(){
 	set_remote_dest "$@"	
-
+	case "$1" in
+		portable) shift; remote_dest="$HOME/flashdrive/portable-home" ;;
+		*) set_remote_dest "$@"; ;;
+	esac 
 	case "$1" in
 		pull) shift; rsync_dirs "$remote_dest$HOME" "$HOME" "$@" ;; 
 		push) shift; rsync_dirs "$HOME" "$remote_dest$HOME" "$@" ;;
-		*) die "Usage: $PROGRAM $COMMAND pull|push [RSYNCOPTIONS]"  ;;
+		*) die "Usage: $PROGRAM $COMMAND [portable] pull|push [RSYNCOPTIONS]"  ;;
 	esac
 }
 
