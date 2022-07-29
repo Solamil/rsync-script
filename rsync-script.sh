@@ -12,8 +12,8 @@ RSYNC_CONF_DIR="$XDG_CONFIG_HOME/rsync"
 GLOBAL_FILTER="$RSYNC_CONF_DIR/global-filter"
 TMP_DIR="/tmp"
 RSYNC_GLOBAL_FILTER=( --filter="merge $GLOBAL_FILTER" )
-LOCALUSER=$(whoami)
-LOCALHOST="$(cat /etc/hostname)"
+USER=$(whoami)
+HOST="$(cat /etc/hostname)"
 
 RS_USER="${RS_USER:-}"
 RS_HOST="${RS_HOST:-}"
@@ -132,7 +132,7 @@ cmd_usage(){
 	cmd_version
 	echo
 	cat <<-_EOF
-	Usage: 	$PROGRAM files [local] [portable] pull|push [RSYNCOPTIONS]
+	Usage: 	$PROGRAM files [local] [portable] pull|push|diff [RSYNCOPTIONS]
 	                Transfer specified in rsync_files() function.
 		$PROGRAM dirs [local] pull|push [RSYNCOPTIONS]
 	                Transfer specified in rsync_dirs() function.
@@ -144,7 +144,7 @@ cmd_usage(){
 	        	List directory contents on remote host.
 	        $PROGRAM diff FILE [RSYNCOPTIONS]
 	        	Show diff between local and remote FILE.		
-		$PROGRAM FILE|DIR pull|push [RSYNCOPTIONS]
+		$PROGRAM FILE|DIR [DEST] pull|push [RSYNCOPTIONS]
 			Transfer specified FILE or DIR.
 	        $PROGRAM help
 	        	Show this help text.
@@ -190,8 +190,10 @@ cmd_files(){
 	esac 
 
 	case "$1" in
-		pull) shift; rsync_files "$remote_dest$HOME" "$HOME" "$@" ;;
-		push) shift; rsync_files "$HOME" "$remote_dest$HOME" "$@" ;;
+		pull) shift; echo "$RS_USER@$RS_HOST ======> $USER@$HOST"
+			rsync_files "$remote_dest$HOME" "$HOME" "$@" ;;
+		push) shift; echo "$USER@$HOST =========> $RS_USER@$RS_HOST"
+			rsync_files "$HOME" "$remote_dest$HOME" "$@" ;;
 		diff) shift; rsync_files "$remote_dest$HOME" "$TMP_DIR$HOME" "--mkpath --compare-dest="$HOME/" $@"; diff_files "$HOME" ;;
 		*) die "Usage: $PROGRAM $COMMAND [local] [portable] pull|push|diff [RSYNCOPTIONS]"  ;;
 	esac
@@ -206,8 +208,10 @@ cmd_dirs(){
 		*) set_remote_dest ;;
 	esac 
 	case "$1" in
-		pull) shift; rsync_dirs "$remote_dest$HOME" "$HOME" "$@" ;; 
-		push) shift; rsync_dirs "$HOME" "$remote_dest$HOME" "$@" ;;
+		pull) shift; echo "$RS_USER@$RS_HOST =========> $USER@$HOST"
+			rsync_dirs "$remote_dest$HOME" "$HOME" "$@" ;; 
+		push) shift; echo "$USER@$HOST =========> $RS_USER@$RS_HOST"
+			rsync_dirs "$HOME" "$remote_dest$HOME" "$@" ;;
 		*) die "Usage: $PROGRAM $COMMAND [portable] pull|push [RSYNCOPTIONS]"  ;;
 	esac
 }
@@ -260,8 +264,10 @@ cmd_individual(){
 	fi
 
 	case "$1" in
-		pull) shift; rsync_individual "$remote_dest$src" "$dest" "$@"; return ;;
-		push) shift; rsync_individual "$src" "$remote_dest$dest" "$@"; return ;;
+		pull) shift; echo "$RS_USER@$RS_HOST =========> $USER@$HOST"
+			rsync_individual "$remote_dest$src" "$dest" "$@"; return ;;
+		push) shift; echo "$USER@$HOST =========> $RS_USER@$RS_HOST"
+			rsync_individual "$src" "$remote_dest$dest" "$@"; return ;;
 		*) die "Usage: $PROGRAM $COMMAND [DEST] pull|push [RSYNCOPTIONS]"  ;;
 	esac
 
