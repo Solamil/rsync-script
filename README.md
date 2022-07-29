@@ -25,7 +25,7 @@ git clone https://github.com/Solamil/rsync-script
 cd rsync-script/
 ```
 
-Configure file `rsync-script.sh` to fit a particular environment(HOSTS, dirs, files,...etc.) (see below CUSTOMIZATION)
+Configure file `rsync-script.sh` to fit a particularly (HOSTS, dirs, files,...etc.) (see below CUSTOMIZATION)
 
 ```
 make install
@@ -35,11 +35,8 @@ make install
 
 The script provides section `CUSTOMIZABLE SCRIPT VARIABLES` where variables can be modified to a particular needs of each user.
 Most of the variables should work right from the start.
-The only variable to take care of `HOST_REMOTE_LIST`.
-For example `HOST_REMOTE_LIST=( user1@desktop1 user1@desktop2 )`.
-Right now it only works for two hosts(one must be local and the other one remote - to work on either side without modify configuration).
-If more than 2 hosts are defined, only first two are prioritized.
-Or the remote host can be explicitly defined in a command line.
+The only variables to take care of are environment variable `RS_USER` and `RS_HOST`.
+Either define them explicitly in command line e.g. `export RS_USER="test" RS_HOST="my_desktop"` or in a file.
 
 Other configuration can be done in functions started as `rsync-*()` for example `rsync-dirs` or `rsync-files`.
 Those functions can be found in `rsync functions` section.
@@ -48,25 +45,25 @@ Mainly list of directories should be changed to fit to a particular environment.
 ## Usage
 
 ```
-Usage: 	$PROGRAM files [local] [portable] pull|push [RSYNCOPTIONS]
+Usage: 	rs files [local] [portable] pull|push [RSYNCOPTIONS]
 		Transfer specified in rsync_files() function.
-	$PROGRAM dirs [local] pull|push [RSYNCOPTIONS]
+	rs dirs [local] pull|push [RSYNCOPTIONS]
 		Transfer specified in rsync_dirs() function.
-	$PROGRAM media [local] pull|push [RSYNCOPTIONS]
+	rs media [local] pull|push [RSYNCOPTIONS]
 		Transfer specified in rsync_media() function.
-	$PROGRAM etc [local] pull|push [RSYNCOPTIONS]
+	rs etc [local] pull|push [RSYNCOPTIONS]
 		Transfer specified in rsync_etc() function.
-	$PROGRAM ls [DIR] [RSYNCOPTIONS]
+	rs ls [DIR] [RSYNCOPTIONS]
 		List directory contents on remote host.
-	$PROGRAM diff FILE [RSYNCOPTIONS]
+	rs diff FILE [RSYNCOPTIONS]
 		Show diff between local and remote FILE.		
-	$PROGRAM FILE|DIR pull|push [RSYNCOPTIONS]
+	rs FILE|DIR pull|push [RSYNCOPTIONS]
 		Transfer specified FILE or DIR.
-	$PROGRAM tmp FILE [RSYNCOPTIONS]
+	rs tmp FILE [RSYNCOPTIONS]
 		Transfer FILE or DIR to TMP_DIR. 
-	$PROGRAM help
+	rs help
 		Show this help text.
-	$PROGRAM version
+	rs version
 		Show version information.
 
 ```

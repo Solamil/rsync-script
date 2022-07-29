@@ -12,7 +12,13 @@ RSYNC_CONF_DIR="$XDG_CONFIG_HOME/rsync"
 GLOBAL_FILTER="$RSYNC_CONF_DIR/global-filter"
 TMP_DIR="/tmp"
 RSYNC_GLOBAL_FILTER=( --filter="merge $GLOBAL_FILTER" )
-HOST_REMOTE_LIST=( michael@lenovo michael@desktop )
+LOCALUSER=$(whoami)
+LOCALHOST="$(cat /etc/hostname)"
+
+# Define for yourself default remote destination
+RS_USER="${RS_USER:-}"
+RS_HOST="${RS_HOST:-}"
+RS_REMOTE_DEST="$RS_USER@$RS_HOST:"
 
 #
 # END CUSTOMIZABLE SCRIPT VARIABLES 
@@ -26,12 +32,8 @@ die(){
 	exit 1
 }
 set_remote_dest(){
-	[[ -n $HOST_REMOTE_LIST ]] || die "Variable HOST_REMOTE_LIST is not defined."
-#	VICE VERSA
-	user=$(whoami); host=$(cat /etc/hostname)
-	local src=$user"@"$host
-	[[ $src == ${HOST_REMOTE_LIST[0]} ]] && remote_dest=${HOST_REMOTE_LIST[1]} || remote_dest=${HOST_REMOTE_LIST[0]}
-	remote_dest=$remote_dest":"
+
+	remote_dest=$RS_REMOTE_DEST
 
 }
 diff_files(){
@@ -157,7 +159,7 @@ cmd_usage(){
 }
 
 cmd_tmp(){
-	set_remote_dest "$@"
+	set_remote_dest
 
 	{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift;
 	
@@ -167,7 +169,7 @@ cmd_tmp(){
 }
 
 cmd_ls(){
-	set_remote_dest "$@"	
+	set_remote_dest
 
 	if [[ $# -eq 0 ]]; then
 		src="$(pwd)/." 
@@ -188,7 +190,7 @@ cmd_files(){
 	case "$1" in
 		local) shift; remote_dest="$HOME/data/portable-home/$host" ;;
 		portable) shift; remote_dest="$HOME/flashdrive/portable-home" ;;
-		*) set_remote_dest "$@"; ;;
+		*) set_remote_dest ;;
 	esac 
 
 	case "$1" in
@@ -202,10 +204,10 @@ cmd_files(){
 }
 
 cmd_dirs(){
-	set_remote_dest "$@"	
+	set_remote_dest
 	case "$1" in
 		portable) shift; remote_dest="$HOME/flashdrive/portable-home" ;;
-		*) set_remote_dest "$@"; ;;
+		*) set_remote_dest ;;
 	esac 
 	case "$1" in
 		pull) shift; rsync_dirs "$remote_dest$HOME" "$HOME" "$@" ;; 
@@ -215,7 +217,7 @@ cmd_dirs(){
 }
 
 cmd_etc(){
-	set_remote_dest "$@"
+	set_remote_dest
 	
 	case "$1" in
 		pull) shift; rsync_etc "$remote_dest/etc" "/etc" "$@" ;; 
@@ -225,7 +227,7 @@ cmd_etc(){
 }
 
 cmd_media(){
-	set_remote_dest "$@"
+	set_remote_dest
 
 	hardrive="/media/$user/HardDrive"
 	local src=$hardrive 
@@ -251,7 +253,8 @@ cmd_individual(){
 	{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1";
 	[[ -d $src ]] && { echo "$1" | grep -vq "/$"; } && src=$src"/"
 
-	set_remote_dest "$@"
+	set_remote_dest
+	
 	case "$2" in
 		pull) shift 2; rsync_individual "$remote_dest$src" "$src" "$@"; return ;;
 		push) shift 2; rsync_individual "$src" "$remote_dest$src" "$@"; return ;;
