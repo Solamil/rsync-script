@@ -15,7 +15,6 @@ RSYNC_GLOBAL_FILTER=( --filter="merge $GLOBAL_FILTER" )
 LOCALUSER=$(whoami)
 LOCALHOST="$(cat /etc/hostname)"
 
-# Define for yourself default remote destination
 RS_USER="${RS_USER:-}"
 RS_HOST="${RS_HOST:-}"
 RS_REMOTE_DEST="$RS_USER@$RS_HOST:"
@@ -31,11 +30,8 @@ die(){
 	echo "$@" >&2
 	exit 1
 }
-set_remote_dest(){
+set_remote_dest(){ remote_dest=$RS_REMOTE_DEST; }
 
-	remote_dest=$RS_REMOTE_DEST
-
-}
 diff_files(){
 	prefix=$1	 
 	remote_files=$(find $TMP_DIR$prefix -name "*" -type f)
@@ -252,13 +248,21 @@ cmd_individual(){
 	COMMAND="FILE"
 	{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1";
 	[[ -d $src ]] && { echo "$1" | grep -vq "/$"; } && src=$src"/"
+	shift
 
 	set_remote_dest
 	
-	case "$2" in
-		pull) shift 2; rsync_individual "$remote_dest$src" "$src" "$@"; return ;;
-		push) shift 2; rsync_individual "$src" "$remote_dest$src" "$@"; return ;;
-		*) die "Usage: $PROGRAM $COMMAND pull|push [RSYNCOPTIONS]"  ;;
+	if ! [[ $1 =~ pull|push ]]; then
+		{ echo "$1" | grep -q "^/"; } && dest="$1" || dest="$(pwd)/$1";
+		shift
+	else
+		dest=$src	
+	fi
+
+	case "$1" in
+		pull) shift; rsync_individual "$remote_dest$src" "$dest" "$@"; return ;;
+		push) shift; rsync_individual "$src" "$remote_dest$dest" "$@"; return ;;
+		*) die "Usage: $PROGRAM $COMMAND [DEST] pull|push [RSYNCOPTIONS]"  ;;
 	esac
 
 	rsync_alone "$@"

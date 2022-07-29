@@ -70,9 +70,9 @@ Usage: 	rs files [local] [portable] pull|push [RSYNCOPTIONS]
 
 ## Simple examples
 
- - `rs remote ls .` - Print out list of files in a current directory(`.`) on remote host. If it exist on remote host.
- - `rs remote push dir/ -r` - Push directory and its content (`-r`) to remote host. Directory is defined with relative path.
- - `rs remote diff compare.txt` - Print out differences between local `compare.txt` and remote one.
+ - `rs ls .` - Print out list of files in a current directory(`.`) on remote host. If it exist on remote host. It is much like `ls -la` on local machine.
+ - `rs dir/ push -r` - Push directory and its content (`-r`) to remote host. Directory is defined with relative path.
+ - `rs diff compare.txt` - Print out differences between local `compare.txt` and remote one.
  - `rs remote files pull --dry-run` - Find candidates(`--dry-run` - rsync option) for pulling files and directories defined in function `rsync-files`
 
 ## Dependencies
