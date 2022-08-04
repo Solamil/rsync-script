@@ -229,12 +229,12 @@ cmd_etc(){
 cmd_media(){
 	set_remote_dest
 
-	hardrive="/media/$user/HardDrive"
+	hardrive="/media/$USER/HardDrive"
 	local src=$hardrive 
 	local dest=$remote_dest$hardrive
 
 	case "$1" in
-		local) shift; dest="/media/$user/ExtDrive" ;;
+		local) shift; dest="/media/$USER/ExtDrive" ;;
 	esac 
 	
 	case "$1" in
