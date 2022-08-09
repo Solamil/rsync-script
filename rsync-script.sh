@@ -8,7 +8,7 @@ RSYNC_DEFAULT_OPTS=( --human-readable --progress --itemize-changes )
 RSYNC_COMPRESSION=( --compress --compress-choice=zstd --compress-level=22 )
 RSYNC_RSH=( "ssh -T -o Compression=no -x" )
 # RSYNC_OPTS=( --recursive --times --update --verbose  ) # not in use
-RSYNC_CONF_DIR="$XDG_CONFIG_HOME/rsync"
+RSYNC_CONF_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/rsync"
 GLOBAL_FILTER="$RSYNC_CONF_DIR/global-filter"
 TMP_DIR="/tmp"
 RSYNC_GLOBAL_FILTER=( --filter="merge $GLOBAL_FILTER" )
