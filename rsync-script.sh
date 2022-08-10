@@ -8,8 +8,8 @@ RSYNC_DEFAULT_OPTS=( --human-readable --progress --itemize-changes )
 RSYNC_COMPRESSION=( --compress --compress-choice=zstd --compress-level=22 )
 RSYNC_RSH=( "ssh -T -o Compression=no -x" )
 # RSYNC_OPTS=( --recursive --times --update --verbose  ) # not in use
-RSYNC_CONF_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/rsync"
-GLOBAL_FILTER="$RSYNC_CONF_DIR/global-filter"
+RS_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/rsync"
+GLOBAL_FILTER="$RS_DIR/global-filter"
 TMP_DIR="/tmp"
 RSYNC_GLOBAL_FILTER=( --filter="merge $GLOBAL_FILTER" )
 USER=$(whoami)
@@ -17,7 +17,6 @@ HOST="$(cat /etc/hostname)"
 
 RS_USER="${RS_USER:-}"
 RS_HOST="${RS_HOST:-}"
-RS_REMOTE_DEST="$RS_USER@$RS_HOST:"
 
 #
 # END CUSTOMIZABLE SCRIPT VARIABLES 
@@ -30,7 +29,7 @@ die(){
 	echo "$@" >&2
 	exit 1
 }
-set_remote_dest(){ remote_dest=$RS_REMOTE_DEST; }
+set_remote_dest(){ remote_dest="$RS_USER@$RS_HOST:"; }
 
 diff_files(){
 	prefix=$1	 
@@ -282,6 +281,7 @@ cmd_host(){
 	echo "---------------------"
 }
 
+[ -f $RS_DIR/rsrc ] && . $RS_DIR/rsrc
 #
 # END subcommand section    
 #
