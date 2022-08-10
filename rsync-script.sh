@@ -48,18 +48,18 @@ diff_files(){
 # BEGIN rsync functions
 #
 
-rsync_alone(){
+rsync_without_args(){
 	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
 	"$@"
 #	-rtvcpRE \
 }
 
 rsync_individual(){
-	local src=$1 dst=$2; shift 2; local args="$@"
+#	local src=$1 dst=$2; shift 2; local args="$@"
 #	PUSH without /
 	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
-	-tvupE ${args[@]} \
-	$src $dst
+	-tvupE "$@" \
+#	$src $dst
 	
 }
 
@@ -265,13 +265,13 @@ cmd_individual(){
 
 	case "$1" in
 		pull) shift; echo "$RS_USER@$RS_HOST =========> $USER@$HOST"
-			rsync_individual "$remote_dest$src" "$dest" "$@"; return ;;
+			rsync_individual "$@" "$remote_dest$src" "$dest" ; return ;;
 		push) shift; echo "$USER@$HOST =========> $RS_USER@$RS_HOST"
-			rsync_individual "$src" "$remote_dest$dest" "$@"; return ;;
+			rsync_individual "$@" "$src" "$remote_dest$dest" ; return ;;
 		*) die "Usage: $PROGRAM $COMMAND [DEST] pull|push [RSYNCOPTIONS]"  ;;
 	esac
 
-	rsync_alone "$@"
+	rsync_without_args "$@"
 }
 
 #
