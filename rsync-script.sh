@@ -50,7 +50,7 @@ diff_files(){
 
 rsync_without_args(){
 	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
-	"$@"
+	$@
 #	-rtvcpRE \
 }
 
@@ -58,7 +58,7 @@ rsync_individual(){
 #	local src=$1 dst=$2; shift 2; local args="$@"
 #	PUSH without /
 	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
-	-tvupE "$@" \
+	-tvupE $@
 #	$src $dst
 	
 }
@@ -159,7 +159,7 @@ cmd_tmp(){
 
 	{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift;
 	
-	rsync_individual "$remote_dest$src" "$TMP_DIR$src" "--mkpath $@"
+	rsync_individual "--mkpath $@" "$remote_dest$src" "$TMP_DIR$src"
 
 
 }
@@ -173,7 +173,7 @@ cmd_ls(){
 		{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift
 	fi
 
-	rsync_individual "$remote_dest$src" "" "$@"
+	rsync_without_args "$@" "$remote_dest$src" "" 
 
 }
 
