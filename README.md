@@ -61,6 +61,8 @@ Usage: 	rs files [local] [portable] pull|push [RSYNCOPTIONS]
 		Transfer specified FILE or DIR.
 	rs tmp FILE [RSYNCOPTIONS]
 		Transfer FILE or DIR to TMP_DIR. 
+	rs host
+		Print content of variables RS_USER and RS_HOST.
 	rs help
 		Show this help text.
 	rs version

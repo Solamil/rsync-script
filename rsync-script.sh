@@ -146,6 +146,8 @@ cmd_usage(){
 	        	Show diff between local and remote FILE.		
 		$PROGRAM FILE|DIR [DEST] pull|push [RSYNCOPTIONS]
 			Transfer specified FILE or DIR.
+		$PROGRAM host
+			Print content of variables RS_USER and RS_HOST
 	        $PROGRAM help
 	        	Show this help text.
 	        $PROGRAM version
@@ -274,6 +276,12 @@ cmd_individual(){
 	rsync_without_args "$@"
 }
 
+cmd_host(){
+	echo "Remote user: $RS_USER"
+	echo "Remote host: $RS_HOST"
+	echo "---------------------"
+}
+
 #
 # END subcommand section    
 #
@@ -290,6 +298,7 @@ case "$1" in
 	files) shift; cmd_files "$@" ;;
 	dirs) shift; cmd_dirs "$@" ;;
 	media) shift; cmd_media "$@" ;;
+	host) shift; cmd_host "$@" ;;
 	*) cmd_individual "$@" ;;
 	
 esac
