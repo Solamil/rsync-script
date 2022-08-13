@@ -308,6 +308,13 @@ cmd_config(){
 		*) die "Usage: $PROGRAM $COMMAND host remote_user [remote_host]"
 	esac
 }
+
+cmd_host(){
+	echo "Remote user: $RS_USER"
+	echo "Remote host: $RS_HOST"
+	echo "---------------------"
+}
+
 [ -f $RS_DIR/rsrc ] && . $RS_DIR/rsrc
 #
 # END subcommand section    
@@ -328,6 +335,7 @@ case "$1" in
 	media) shift; cmd_media "$@" ;;
 	host) shift; cmd_host "$@" ;;
 	config) shift; cmd_config "$@" ;;
+	host) shift; cmd_host "$@" ;;
 	*) cmd_individual "$@" ;;
 	
 esac
