@@ -31,6 +31,10 @@ die(){
 }
 set_remote_dest(){ remote_dest="$RS_USER@$RS_HOST:"; }
 
+set_host(){
+	sed -i "s/^RS_USER=.*/RS_USER=\"$1\"/" $RS_DIR/rsrc
+	sed -i "s/^RS_HOST=.*/RS_HOST=\"$2\"/" $RS_DIR/rsrc
+}
 diff_files(){
 	prefix=$1	 
 	remote_files=$(find $TMP_DIR$prefix -name "*" -type f)
@@ -298,6 +302,12 @@ cmd_host(){
 	echo "---------------------"
 }
 
+cmd_config(){
+	case "$1" in
+		host) shift; set_host "$@" ;;
+		*) die "Usage: $PROGRAM $COMMAND host remote_user [remote_host]"
+	esac
+}
 [ -f $RS_DIR/rsrc ] && . $RS_DIR/rsrc
 #
 # END subcommand section    
@@ -317,6 +327,7 @@ case "$1" in
 	dirs1) shift; cmd_dirs_neo "$@" ;;
 	media) shift; cmd_media "$@" ;;
 	host) shift; cmd_host "$@" ;;
+	config) shift; cmd_config "$@" ;;
 	*) cmd_individual "$@" ;;
 	
 esac
