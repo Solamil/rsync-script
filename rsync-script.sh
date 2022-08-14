@@ -217,6 +217,23 @@ cmd_dirs(){
 	esac
 }
 
+cmd_dirs_neo(){
+	case "$1" in
+		portable) shift; remote_dest="$HOME/flashdrive/portable-home" ;;
+		*) set_remote_dest ;;
+	esac 
+
+	case "$1" in
+		pull) shift; echo "$RS_USER@$RS_HOST =========> $USER@$HOST"
+			rsync_individual -rRF --links $@ "$remote_dest$HOME/./" "$HOME/"
+			;; 
+		push) shift; echo "$USER@$HOST =========> $RS_USER@$RS_HOST"
+			rsync_individual -rRF --links $@ "$HOME/./"  "$remote_dest$HOME/./"
+			;;
+		*) die "Usage: $PROGRAM $COMMAND pull|push [RSYNCOPTIONS]"  
+			;;
+	esac
+}
 cmd_etc(){
 	set_remote_dest
 	
@@ -297,6 +314,7 @@ case "$1" in
 	"ls") shift; cmd_ls "$@" ;;
 	files) shift; cmd_files "$@" ;;
 	dirs) shift; cmd_dirs "$@" ;;
+	dirs1) shift; cmd_dirs_neo "$@" ;;
 	media) shift; cmd_media "$@" ;;
 	host) shift; cmd_host "$@" ;;
 	*) cmd_individual "$@" ;;
