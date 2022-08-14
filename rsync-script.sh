@@ -296,12 +296,6 @@ cmd_individual(){
 	rsync_without_args "$@"
 }
 
-cmd_host(){
-	echo "Remote user: $RS_USER"
-	echo "Remote host: $RS_HOST"
-	echo "---------------------"
-}
-
 cmd_config(){
 	case "$1" in
 		host) shift; set_host "$@" ;;
