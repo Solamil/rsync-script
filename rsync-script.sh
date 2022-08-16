@@ -156,7 +156,7 @@ cmd_diff(){
 }
 
 
-cmd_dirs(){
+cmd_home(){
 	case "$1" in
 		portable) shift; remote_dest="$HOME/flashdrive/portable-home" ;;
 		*) set_remote_dest ;;
@@ -236,6 +236,9 @@ cmd_host(){
 	echo "---------------------"
 }
 
+# Further personal customization in the script file,
+# without "make install" all over again
+
 [ -f $RS_DIR/rsrc ] && . $RS_DIR/rsrc
 #
 # END subcommand section    
@@ -249,7 +252,7 @@ case "$1" in
  	help|--help) shift; cmd_usage "$@" ;;
 	diff) shift; cmd_diff "$@" ;;
 	"ls") shift; cmd_ls "$@" ;;
-	dirs) shift; cmd_dirs "$@" ;;
+	home) shift; cmd_home "$@" ;;
 	media) shift; cmd_media "$@" ;;
 	host) shift; cmd_host "$@" ;;
 	config) shift; cmd_config "$@" ;;
