@@ -33,7 +33,13 @@ set_remote_dest(){ remote_dest="$RS_USER@$RS_HOST:"; }
 
 set_host(){
 	sed -i "s/^RS_USER=.*/RS_USER=\"$1\"/" $RS_DIR/rsrc
-	sed -i "s/^RS_HOST=.*/RS_HOST=\"$2\"/" $RS_DIR/rsrc
+	RS_USER=$1
+	if [[ -n "$2" ]]; then
+		[[ $HOST == "$2" ]] && die "Error: The name \"$2\" for remote host is identical as for localhost." 
+		sed -i "s/^RS_HOST=.*/RS_HOST=\"$2\"/" $RS_DIR/rsrc
+		RS_HOST=$2
+	fi
+
 }
 diff_files(){
 	prefix=$1	 
@@ -149,8 +155,8 @@ cmd_usage(){
 	        	Show diff between local and remote FILE.		
 		$PROGRAM FILE|DIR [DEST] pull|push [RSYNCOPTIONS]
 			Transfer specified FILE or DIR.
-		$PROGRAM host
-			Print content of variables RS_USER and RS_HOST
+		$PROGRAM host [remote_user] [remote_host]
+			Print content of variables RS_USER and RS_HOST and optionally set these variables. 
 	        $PROGRAM help
 	        	Show this help text.
 	        $PROGRAM version
@@ -304,6 +310,7 @@ cmd_config(){
 }
 
 cmd_host(){
+	[[ $# -gt 0 ]] && set_host "$@"
 	echo "Remote user: $RS_USER"
 	echo "Remote host: $RS_HOST"
 	echo "---------------------"
