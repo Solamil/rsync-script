@@ -84,24 +84,11 @@ rsync_media(){
 #	--ignore-existing \
 }
 
-rsync_dirs(){
-	local src=$1 dst=$2; shift 2; local args="$@"
-#	--backup-dir="/tmp/" \
-	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
-	-rtvupRE --links ${args[@]} --info=NAME1 -F \
-	$src/./{dl/,docs/,scripts/,pics/,devel/} \
-	$dst/
-
-#	-F \
-#	--delete-after "$RSYNC_GLOBAL_FILTER" \
-}
-
 rsync_files(){
 	local src=$1 dst=$2; shift 2; local args="$@"
 
 	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
 	-rtvupRE --links ${args[@]} --info=NAME1 -F \
-	$src/./{.bitmonero/,.imwheelrc} \
 	$src/./{.config/,scripts/,.local/share/} \
 	$dst/
 }
@@ -201,21 +188,6 @@ cmd_files(){
 }
 
 cmd_dirs(){
-	set_remote_dest
-	case "$1" in
-		portable) shift; remote_dest="$HOME/flashdrive/portable-home" ;;
-		*) set_remote_dest ;;
-	esac 
-	case "$1" in
-		pull) shift; echo "$RS_USER@$RS_HOST =========> $USER@$HOST"
-			rsync_dirs "$remote_dest$HOME" "$HOME" "$@" ;; 
-		push) shift; echo "$USER@$HOST =========> $RS_USER@$RS_HOST"
-			rsync_dirs "$HOME" "$remote_dest$HOME" "$@" ;;
-		*) die "Usage: $PROGRAM $COMMAND [portable] pull|push [RSYNCOPTIONS]"  ;;
-	esac
-}
-
-cmd_dirs_neo(){
 	case "$1" in
 		portable) shift; remote_dest="$HOME/flashdrive/portable-home" ;;
 		*) set_remote_dest ;;
@@ -310,7 +282,6 @@ case "$1" in
 	"ls") shift; cmd_ls "$@" ;;
 	files) shift; cmd_files "$@" ;;
 	dirs) shift; cmd_dirs "$@" ;;
-	dirs1) shift; cmd_dirs_neo "$@" ;;
 	media) shift; cmd_media "$@" ;;
 	host) shift; cmd_host "$@" ;;
 	config) shift; cmd_config "$@" ;;
