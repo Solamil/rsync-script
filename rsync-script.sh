@@ -84,17 +84,6 @@ rsync_media(){
 #	--ignore-existing \
 }
 
-rsync_files(){
-	local src=$1 dst=$2; shift 2; local args="$@"
-
-	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
-	-rtvupRE --links ${args[@]} --info=NAME1 -F \
-	$src/./{.config/,scripts/,.local/share/} \
-	$dst/
-}
-
-#	$src/./ \
-
 
 #
 # END rsync functions
@@ -118,9 +107,7 @@ cmd_usage(){
 	cmd_version
 	echo
 	cat <<-_EOF
-	Usage: 	$PROGRAM files [local] [portable] pull|push|diff [RSYNCOPTIONS]
-	                Transfer specified in rsync_files() function.
-		$PROGRAM dirs [local] pull|push [RSYNCOPTIONS]
+	Usage: 	$PROGRAM dirs [local] pull|push [RSYNCOPTIONS]
 	                Transfer specified in rsync_dirs() function.
 		$PROGRAM media [local] pull|push [RSYNCOPTIONS]
 	                Transfer specified in rsync_media() function.
@@ -168,24 +155,6 @@ cmd_diff(){
 	diff --color=always "$src" "$TMP_DIR$src"
 }
 
-cmd_files(){
-	case "$1" in
-		local) shift; remote_dest="$HOME/data/portable-home/$host" ;;
-		portable) shift; remote_dest="$HOME/flashdrive/portable-home" ;;
-		*) set_remote_dest ;;
-	esac 
-
-	case "$1" in
-		pull) shift; echo "$RS_USER@$RS_HOST ======> $USER@$HOST"
-			rsync_files "$remote_dest$HOME" "$HOME" "$@" ;;
-		push) shift; echo "$USER@$HOST =========> $RS_USER@$RS_HOST"
-			rsync_files "$HOME" "$remote_dest$HOME" "$@" ;;
-		diff) shift; rsync_files "$remote_dest$HOME" "$TMP_DIR$HOME" "--mkpath --compare-dest="$HOME/" $@"; diff_files "$HOME" ;;
-		*) die "Usage: $PROGRAM $COMMAND [local] [portable] pull|push|diff [RSYNCOPTIONS]"  ;;
-	esac
-
-
-}
 
 cmd_dirs(){
 	case "$1" in
@@ -280,7 +249,6 @@ case "$1" in
  	help|--help) shift; cmd_usage "$@" ;;
 	diff) shift; cmd_diff "$@" ;;
 	"ls") shift; cmd_ls "$@" ;;
-	files) shift; cmd_files "$@" ;;
 	dirs) shift; cmd_dirs "$@" ;;
 	media) shift; cmd_media "$@" ;;
 	host) shift; cmd_host "$@" ;;

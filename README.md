@@ -45,9 +45,7 @@ Mainly list of directories should be changed to fit to a particular environment.
 ## Usage
 
 ```
-Usage: 	rs files [local] [portable] pull|push [RSYNCOPTIONS]
-		Transfer specified in rsync_files() function.
-	rs dirs [local] pull|push [RSYNCOPTIONS]
+Usage: 	rs dirs [local] pull|push [RSYNCOPTIONS]
 		Transfer specified in rsync_dirs() function.
 	rs media [local] pull|push [RSYNCOPTIONS]
 		Transfer specified in rsync_media() function.
