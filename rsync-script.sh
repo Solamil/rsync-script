@@ -84,16 +84,6 @@ rsync_media(){
 #	--ignore-existing \
 }
 
-rsync_etc(){
-	local src=$1 dst=$2; shift 2; local args="$@"
-	sudo $RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
-	-rtvupRE --links ${args[@]} \
-	$src/./{sudoers,locale.gen,locale.conf,pacman.d/hooks/} \
-	$src/./ssh/sshd_config \
-	$dst/
-#	/etc/pulse/default.pa \
-}
-
 rsync_dirs(){
 	local src=$1 dst=$2; shift 2; local args="$@"
 #	--backup-dir="/tmp/" \
@@ -147,8 +137,6 @@ cmd_usage(){
 	                Transfer specified in rsync_dirs() function.
 		$PROGRAM media [local] pull|push [RSYNCOPTIONS]
 	                Transfer specified in rsync_media() function.
-		$PROGRAM etc [local] pull|push [RSYNCOPTIONS]
-	                Transfer specified in rsync_etc() function.
 	        $PROGRAM ls [DIR] [RSYNCOPTIONS]
 	        	List directory contents on remote host.
 	        $PROGRAM diff FILE [RSYNCOPTIONS]
@@ -244,15 +232,6 @@ cmd_dirs_neo(){
 			;;
 	esac
 }
-cmd_etc(){
-	set_remote_dest
-	
-	case "$1" in
-		pull) shift; rsync_etc "$remote_dest/etc" "/etc" "$@" ;; 
-		push) shift; rsync_etc "/etc" "$remote_dest/etc" "$@" ;;
-		*) die "Usage: $PROGRAM $COMMAND pull|push [RSYNCOPTIONS]"  ;;
-	esac
-}
 
 cmd_media(){
 	set_remote_dest
@@ -327,7 +306,6 @@ COMMAND="$1"
 case "$1" in
  	version|--version) shift; cmd_version "$@" ;;
  	help|--help) shift; cmd_usage "$@" ;;
-	etc) shift; cmd_etc "$@" ;;
 	diff) shift; cmd_diff "$@" ;;
 	"ls") shift; cmd_ls "$@" ;;
 	files) shift; cmd_files "$@" ;;

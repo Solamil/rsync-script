@@ -51,8 +51,6 @@ Usage: 	rs files [local] [portable] pull|push [RSYNCOPTIONS]
 		Transfer specified in rsync_dirs() function.
 	rs media [local] pull|push [RSYNCOPTIONS]
 		Transfer specified in rsync_media() function.
-	rs etc [local] pull|push [RSYNCOPTIONS]
-		Transfer specified in rsync_etc() function.
 	rs ls [DIR] [RSYNCOPTIONS]
 		List directory contents on remote host.
 	rs diff FILE [RSYNCOPTIONS]
