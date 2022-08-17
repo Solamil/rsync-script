@@ -162,7 +162,7 @@ cmd_home(){
 		*) die "Usage: $PROGRAM $COMMAND pull|push [RSYNCOPTIONS]"  
 			;;
 	esac
-	rsync_individual -rRF --links $@ $SRC $DEST
+	rsync_individual "$@" -rRF --links $SRC $DEST
 }
 
 cmd_media(){
@@ -185,7 +185,7 @@ cmd_media(){
 			;; # Syncing it back
 		*) die "Usage: $PROGRAM $COMMAND [local] pull|push [RSYNCOPTIONS]"  ;;
 	esac
-	rsync_without_args -rtvpRF --ignore-existing "$@" $SRC $DEST
+	rsync_without_args "$@" -rtvpRF --ignore-existing $SRC $DEST
 }
 
 cmd_individual(){
