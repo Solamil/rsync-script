@@ -154,30 +154,35 @@ cmd_home(){
 
 	case "$1" in
 		pull) shift; echo "$RS_USER@$RS_HOST =========> $USER@$HOST"
-			rsync_individual -rRF --links $@ "$remote_dest$HOME/./" "$HOME/"
+			local SRC="$remote_dest$HOME/./" DEST="$HOME/"
 			;; 
 		push) shift; echo "$USER@$HOST =========> $RS_USER@$RS_HOST"
-			rsync_individual -rRF --links $@ "$HOME/./"  "$remote_dest$HOME/./"
+			local SRC="$HOME/./" DEST="$remote_dest$HOME/" 
 			;;
 		*) die "Usage: $PROGRAM $COMMAND pull|push [RSYNCOPTIONS]"  
 			;;
 	esac
+	rsync_individual -rRF --links $@ $SRC $DEST
 }
 
 cmd_media(){
 	set_remote_dest
 
 	hardrive="/media/$USER/HardDrive"
+	extdrive="/media/$USER/ExtDrive" 
 	local src=$hardrive 
 	local dest=$remote_dest$hardrive
 
 	case "$1" in
-		portable) shift; dest="/media/$USER/ExtDrive" ;;
+		portable) shift; dest=$extdrive
+			;;
 	esac 
 	
 	case "$1" in
-		pull) shift; local SRC="$dest/./" DEST="$src" ;;
-		push) shift; local SRC="$src/./" DEST="$dest" ;; # Syncing it back
+		pull) shift; local SRC="$dest/./" DEST="$src" 
+			;;
+		push) shift; local SRC="$src/./" DEST="$dest" 
+			;; # Syncing it back
 		*) die "Usage: $PROGRAM $COMMAND [local] pull|push [RSYNCOPTIONS]"  ;;
 	esac
 	rsync_without_args -rtvpRF --ignore-existing "$@" $SRC $DEST
@@ -203,12 +208,15 @@ cmd_individual(){
 
 	case "$1" in
 		pull) shift; echo "$RS_USER@$RS_HOST =========> $USER@$HOST"
-			rsync_individual "$@" "$remote_dest$src" "$dest" ; return ;;
+			local SRC="$remote_dest$src" DEST="$dest" 
+			;;
 		push) shift; echo "$USER@$HOST =========> $RS_USER@$RS_HOST"
-			rsync_individual "$@" "$src" "$remote_dest$dest" ; return ;;
+			local SRC="$src" DEST="$remote_dest$dest"
+			;;
 		*) die "Usage: $PROGRAM $COMMAND [DEST] pull|push [RSYNCOPTIONS]"  ;;
 	esac
 
+	rsync_individual "$@" $SRC $DEST
 }
 
 cmd_config(){
