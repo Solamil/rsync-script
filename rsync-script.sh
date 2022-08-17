@@ -72,18 +72,6 @@ rsync_individual(){
 	
 }
 
-rsync_media(){
-	local src=$1 dst=$2; shift 2; local args="$@"
-	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
-	-rtvpR --ignore-existing ${args[@]} \
-	"${RSYNC_GLOBAL_FILTER[@]}" \
-	$src/./{Movies/,Music/,docs/,Phone/} \
-	$dst/
-
-# 	"$RSYNC_GLOBAL_FILTER" 
-#	--ignore-existing \
-}
-
 
 #
 # END rsync functions
@@ -182,15 +170,15 @@ cmd_media(){
 	local dest=$remote_dest$hardrive
 
 	case "$1" in
-		local) shift; dest="/media/$USER/ExtDrive" ;;
+		portable) shift; dest="/media/$USER/ExtDrive" ;;
 	esac 
 	
 	case "$1" in
-		pull) shift; local SRC="$dest" DEST="$src" ;;
-		push) shift; local SRC="$src" DEST="$dest" ;; # Syncing it back
+		pull) shift; local SRC="$dest/./" DEST="$src" ;;
+		push) shift; local SRC="$src/./" DEST="$dest" ;; # Syncing it back
 		*) die "Usage: $PROGRAM $COMMAND [local] pull|push [RSYNCOPTIONS]"  ;;
 	esac
-	rsync_media $SRC $DEST "$@"
+	rsync_without_args -rtvpRF --ignore-existing "$@" $SRC $DEST
 }
 
 cmd_individual(){
@@ -219,7 +207,6 @@ cmd_individual(){
 		*) die "Usage: $PROGRAM $COMMAND [DEST] pull|push [RSYNCOPTIONS]"  ;;
 	esac
 
-	rsync_without_args "$@"
 }
 
 cmd_config(){
