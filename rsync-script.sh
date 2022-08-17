@@ -39,8 +39,8 @@ set_host(){
 		sed -i "s/^RS_HOST=.*/RS_HOST=\"$2\"/" $RS_DIR/rsrc
 		RS_HOST=$2
 	fi
-
 }
+
 diff_files(){
 	prefix=$1	 
 	remote_files=$(find $TMP_DIR$prefix -name "*" -type f)
@@ -95,7 +95,7 @@ cmd_usage(){
 	cmd_version
 	echo
 	cat <<-_EOF
-	Usage: 	$PROGRAM dirs [local] pull|push [RSYNCOPTIONS]
+	Usage: 	$PROGRAM home [local] pull|push [RSYNCOPTIONS]
 	                Transfer specified in rsync_dirs() function.
 		$PROGRAM media [local] pull|push [RSYNCOPTIONS]
 	                Transfer specified in rsync_media() function.
@@ -107,6 +107,8 @@ cmd_usage(){
 			Transfer specified FILE or DIR.
 		$PROGRAM host [remote_user] [remote_host]
 			Print content of variables RS_USER and RS_HOST and optionally set these variables. 
+		$PROGRAM config host remote_user [remote_host]
+			Set variables RS_USER and RS_HOST in config file.
 	        $PROGRAM help
 	        	Show this help text.
 	        $PROGRAM version

@@ -4,7 +4,7 @@
 The actual transfer is done by [rsync](https://github.com/WayneD/rsync), which is a command to transfer files between local and remote host. It also manages to transfer files locally.
 It is available in most of package managers.
 It provides a lot of options and features.
-In order to use rsync effectively and quickly on daily basis, helper script `rsync-script.sh` comes in hand. 
+In order to use rsync effectively and quickly on daily basis, helper script `rsync-script.sh` comes in hand. Don't think about what sort of options to use ever again.  
 This script allows to `push` or `pull` changes or new directories and files to or from remote host.
 The same logic as used in git repositories.
 
@@ -25,7 +25,7 @@ git clone https://github.com/Solamil/rsync-script
 cd rsync-script/
 ```
 
-Configure file `rsync-script.sh` to fit a particularly (HOSTS, dirs, files,...etc.) (see below CUSTOMIZATION)
+Configure file `rsync-script.sh` to fit particular environment. Mainly variables `RS_USER` and `RS_HOST`  (see below CUSTOMIZATION)
 
 ```
 make install
@@ -36,17 +36,15 @@ make install
 The script provides section `CUSTOMIZABLE SCRIPT VARIABLES` where variables can be modified to a particular needs of each user.
 Most of the variables should work right from the start.
 The only variables to take care of are environment variable `RS_USER` and `RS_HOST`.
-Either define them explicitly in command line e.g. `export RS_USER="test" RS_HOST="my_desktop"` or in a file.
+Ideally those variables can be set in config file `~/.config/rsync/rsrc`.
+Either define them explicitly in command line e.g. `export RS_USER="test" RS_HOST="my_desktop"` or in a file.  
 
-Other configuration can be done in functions started as `rsync-*()` for example `rsync-dirs` or `rsync-files`.
-Those functions can be found in `rsync functions` section.
-Mainly list of directories should be changed to fit to a particular environment. 
-
+The other configuration what file to avoid or add is done by rsync filters in each directory.
 ## Usage
 
 ```
-Usage: 	rs dirs [local] pull|push [RSYNCOPTIONS]
-		Transfer specified in rsync_dirs() function.
+Usage: 	rs home [local] pull|push [RSYNCOPTIONS]
+		Transfer files in $HOME directory, considering rsync filters.
 	rs media [local] pull|push [RSYNCOPTIONS]
 		Transfer specified in rsync_media() function.
 	rs ls [DIR] [RSYNCOPTIONS]
@@ -55,10 +53,10 @@ Usage: 	rs dirs [local] pull|push [RSYNCOPTIONS]
 		Show diff between local and remote FILE.		
 	rs FILE|DIR pull|push [RSYNCOPTIONS]
 		Transfer specified FILE or DIR.
-	rs tmp FILE [RSYNCOPTIONS]
-		Transfer FILE or DIR to TMP_DIR. 
-	rs host
-		Print content of variables RS_USER and RS_HOST.
+	rs host [remote_user] [remote_host]
+		Print content of variables RS_USER and RS_HOST and optionally set these variables. 
+	rs config host remote_user [remote_host] 
+		Set variables RS_USER and RS_HOST in config file.
 	rs help
 		Show this help text.
 	rs version
@@ -71,7 +69,7 @@ Usage: 	rs dirs [local] pull|push [RSYNCOPTIONS]
  - `rs ls .` - Print out list of files in a current directory(`.`) on remote host. If it exist on remote host. It is much like `ls -la` on local machine.
  - `rs dir/ push -r` - Push directory and its content (`-r`) to remote host. Directory is defined with relative path.
  - `rs diff compare.txt` - Print out differences between local `compare.txt` and remote one.
- - `rs remote files pull --dry-run` - Find candidates(`--dry-run` - rsync option) for pulling files and directories defined in function `rsync-files`
+ - `rs files pull --dry-run` - Find candidates(`--dry-run` - rsync option) for pulling files and directories defined in function `rsync-files`
 
 ## Dependencies
 
