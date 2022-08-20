@@ -29,7 +29,7 @@ die(){
 	echo "$@" >&2
 	exit 1
 }
-set_remote_dest(){ remote_dest="$RS_USER@$RS_HOST:"; }
+set_prefix(){ prefix="$RS_USER@$RS_HOST:"; }
 
 set_host(){
 	sed -i "s/^RS_USER=.*/RS_USER=\"$1\"/" $RS_DIR/rsrc
@@ -118,17 +118,17 @@ cmd_usage(){
 }
 
 cmd_tmp(){
-	set_remote_dest
+	set_prefix
 
 	{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift;
 	
-	rsync_individual "--mkpath $@" "$remote_dest$src" "$TMP_DIR$src"
+	rsync_individual "--mkpath $@" "$prefix$src" "$TMP_DIR$src"
 
 
 }
 
 cmd_ls(){
-	set_remote_dest
+	set_prefix
 
 	if [[ $# -eq 0 ]]; then
 		src="$(pwd)/." 
@@ -136,7 +136,7 @@ cmd_ls(){
 		{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift
 	fi
 
-	rsync_without_args "$@" "$remote_dest$src" "" 
+	rsync_without_args "$@" "$prefix$src" "" 
 
 }
 
@@ -148,16 +148,16 @@ cmd_diff(){
 
 cmd_home(){
 	case "$1" in
-		portable) shift; remote_dest="$HOME/flashdrive/portable-home" ;;
-		*) set_remote_dest ;;
+		portable) shift; prefix="$HOME/flashdrive/portable-home" ;;
+		*) set_prefix ;;
 	esac 
 
 	case "$1" in
 		pull) shift; echo "$RS_USER@$RS_HOST =========> $USER@$HOST"
-			local SRC="$remote_dest$HOME/./" DEST="$HOME/"
+			local SRC="$prefix$HOME/./" DEST="$HOME/"
 			;; 
 		push) shift; echo "$USER@$HOST =========> $RS_USER@$RS_HOST"
-			local SRC="$HOME/./" DEST="$remote_dest$HOME/" 
+			local SRC="$HOME/./" DEST="$prefix$HOME/" 
 			;;
 		*) die "Usage: $PROGRAM $COMMAND pull|push [RSYNCOPTIONS]"  
 			;;
@@ -166,12 +166,12 @@ cmd_home(){
 }
 
 cmd_media(){
-	set_remote_dest
+	set_prefix
 
 	hardrive="/media/$USER/HardDrive"
 	extdrive="/media/$USER/ExtDrive" 
 	local src=$hardrive 
-	local dest=$remote_dest$hardrive
+	local dest=$prefix$hardrive
 
 	case "$1" in
 		portable) shift; dest=$extdrive
@@ -197,7 +197,7 @@ cmd_individual(){
 	[[ -d $src ]] && { echo "$1" | grep -vq "/$"; } && src=$src"/"
 	shift
 
-	set_remote_dest
+	set_prefix
 	
 	if ! [[ $1 =~ pull|push ]]; then
 		{ echo "$1" | grep -q "^/"; } && dest="$1" || dest="$(pwd)/$1";
@@ -208,10 +208,10 @@ cmd_individual(){
 
 	case "$1" in
 		pull) shift; echo "$RS_USER@$RS_HOST =========> $USER@$HOST"
-			local SRC="$remote_dest$src" DEST="$dest" 
+			local SRC="$prefix$src" DEST="$dest" 
 			;;
 		push) shift; echo "$USER@$HOST =========> $RS_USER@$RS_HOST"
-			local SRC="$src" DEST="$remote_dest$dest"
+			local SRC="$src" DEST="$prefix$dest"
 			;;
 		*) die "Usage: $PROGRAM $COMMAND [DEST] pull|push [RSYNCOPTIONS]"  ;;
 	esac
