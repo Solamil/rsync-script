@@ -26,6 +26,7 @@ cd rsync-script/
 ```
 
 Configure file `rsync-script.sh` to fit particular environment. Mainly variables `RS_USER` and `RS_HOST`  (see below CUSTOMIZATION)
+Then only execute `make install`.
 
 ```
 make install
@@ -36,10 +37,10 @@ make install
 The script provides section `CUSTOMIZABLE SCRIPT VARIABLES` where variables can be modified to a particular needs of each user.
 Most of the variables should work right from the start.
 The only variables to take care of are environment variable `RS_USER` and `RS_HOST`.
-Ideally those variables can be set in config file `~/.config/rsync/rsrc`.
+Ideally those variables can be set in config file `$HOME/.config/rsync/rsrc`.
 Either define them explicitly in command line e.g. `export RS_USER="test" RS_HOST="my_desktop"` or in a file.  
 
-The other configuration what file to avoid or add is done by rsync filters in each directory.
+Whole new behavior can be overriden or set in `$HOME/.config/rsync/rsrc`.
 ## Usage
 
 ```
@@ -69,13 +70,13 @@ Usage: 	rs home [local] pull|push [RSYNCOPTIONS]
  - `rs ls .` - Print out list of files in a current directory(`.`) on remote host. If it exist on remote host. It is much like `ls -la` on local machine.
  - `rs dir/ push -r` - Push directory and its content (`-r`) to remote host. Directory is defined with relative path.
  - `rs diff compare.txt` - Print out differences between local `compare.txt` and remote one.
- - `rs files pull --dry-run` - Find candidates(`--dry-run` - rsync option) for pulling files and directories defined in function `rsync-files`
+ - `rs home pull --dry-run` - Find candidates(`--dry-run` - rsync option) for pulling files and directories defined in `$HOME` directory.
 
 ## Dependencies
 
- - `rsync` - transfers files
+ - `rsync`, `ssh` - transfers files, default transfer over ssh
  - `diff` - compares content of two files
 
 ## Author
 
-Michal
+Michal < michal@michalkukla.xyz >
