@@ -68,9 +68,10 @@ Usage: 	rs home [local] pull|push [RSYNCOPTIONS]
 ## Simple examples
 
  - `rs ls .` - Print out list of files in a current directory(`.`) on remote host. If it exist on remote host. It is much like `ls -la` on local machine.
- - `rs dir/ push -r` - Push directory and its content (`-r`) to remote host. Directory is defined with relative path.
  - `rs diff compare.txt` - Print out differences between local `compare.txt` and remote one.
  - `rs home pull --dry-run` - Find candidates(`--dry-run` - rsync option) for pulling files and directories defined in `$HOME` directory.
+ - `rs dir/ push -r` - Push directory and its content (`-r`) to remote host. Directory is defined with relative path.
+ - `rs path/to/file/test.txt pathtofile/ push` - Transfer `test.txt` from directory `path/to/file/` to directory `pathtofile/` on a remote side.
 
 ## Dependencies
 
