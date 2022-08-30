@@ -15,8 +15,13 @@ RSYNC_GLOBAL_FILTER=( --filter="merge $GLOBAL_FILTER" )
 USER=$(whoami)
 HOST="$(cat /etc/hostname)"
 
+INDIVIDUAL_OPTS=( -tvupE )
+HOME_OPTS=( -rtuvpERFH --links )
+MEDIA_OPTS=( -rtvpRF --ignore-existing )
+
 RS_USER="${RS_USER:-}"
 RS_HOST="${RS_HOST:-}"
+
 
 #
 # END CUSTOMIZABLE SCRIPT VARIABLES 
@@ -57,19 +62,10 @@ diff_files(){
 # BEGIN rsync functions
 #
 
-rsync_without_args(){
+rsync_func(){
 	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
 	$@
 #	-rtvcpRE \
-}
-
-rsync_individual(){
-#	local src=$1 dst=$2; shift 2; local args="$@"
-#	PUSH without /
-	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
-	-tvupE $@
-#	$src $dst
-	
 }
 
 
@@ -162,7 +158,7 @@ cmd_home(){
 		*) die "Usage: $PROGRAM $COMMAND pull|push [RSYNCOPTIONS]"  
 			;;
 	esac
-	rsync_individual "$@" -rRF --links $SRC $DEST
+	rsync_func "$@" ${HOME_OPTS[@]} $SRC $DEST
 }
 
 cmd_media(){
@@ -185,7 +181,7 @@ cmd_media(){
 			;; # Syncing it back
 		*) die "Usage: $PROGRAM $COMMAND [local] pull|push [RSYNCOPTIONS]"  ;;
 	esac
-	rsync_without_args "$@" -rtvpRF --ignore-existing $SRC $DEST
+	rsync_func "$@" ${MEDIA_OPTS[@]}  $SRC $DEST
 }
 
 cmd_individual(){
@@ -193,12 +189,13 @@ cmd_individual(){
 
 
 	COMMAND="FILE"
+	echo "$@"
 	{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1";
 	[[ -d $src ]] && { echo "$1" | grep -vq "/$"; } && src=$src"/"
 	shift
 
 	set_prefix
-	
+		
 	if ! [[ $1 =~ pull|push ]]; then
 		{ echo "$1" | grep -q "^/"; } && dest="$1" || dest="$(pwd)/$1";
 		shift
@@ -216,7 +213,7 @@ cmd_individual(){
 		*) die "Usage: $PROGRAM $COMMAND [DEST] pull|push [RSYNCOPTIONS]"  ;;
 	esac
 
-	rsync_individual "$@" $SRC $DEST
+	rsync_func "$@" ${INDIVIDUAL_OPTS[@]} $SRC $DEST
 }
 
 cmd_config(){
