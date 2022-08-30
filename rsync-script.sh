@@ -12,6 +12,8 @@ RS_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/rsync"
 GLOBAL_FILTER="$RS_DIR/global-filter"
 TMP_DIR="/tmp"
 RSYNC_GLOBAL_FILTER=( --filter="merge $GLOBAL_FILTER" )
+
+# Local side
 USER=$(whoami)
 HOST="$(cat /etc/hostname)"
 
@@ -19,6 +21,7 @@ INDIVIDUAL_OPTS=( -tvupE )
 HOME_OPTS=( -rtuvpERFH --links )
 MEDIA_OPTS=( -rtvpRF --ignore-existing )
 
+# Remote side
 RS_USER="${RS_USER:-}"
 RS_HOST="${RS_HOST:-}"
 
@@ -115,11 +118,11 @@ cmd_usage(){
 
 cmd_tmp(){
 	set_prefix
-
-	{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift;
 	
+	{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift;
+	echo "$prefix =========> $USER@$HOST"
 	rsync_func "--mkpath $@" "$prefix$src" "$TMP_DIR$src"
-
+	
 
 }
 
@@ -131,7 +134,7 @@ cmd_ls(){
 	else 
 		{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift
 	fi
-
+	echo "$USER@$HOST =========> $prefix"
 	rsync_func "$@" "$prefix$src" "" 
 
 }
@@ -149,10 +152,10 @@ cmd_home(){
 	esac 
 
 	case "$1" in
-		pull) shift; echo "$RS_USER@$RS_HOST =========> $USER@$HOST"
+		pull) shift; echo "$prefix =========> $USER@$HOST"
 			local SRC="$prefix$HOME/./" DEST="$HOME/"
 			;; 
-		push) shift; echo "$USER@$HOST =========> $RS_USER@$RS_HOST"
+		push) shift; echo "$USER@$HOST =========> $prefix"
 			local SRC="$HOME/./" DEST="$prefix$HOME/" 
 			;;
 		*) die "Usage: $PROGRAM $COMMAND pull|push [RSYNCOPTIONS]"  
@@ -175,9 +178,11 @@ cmd_media(){
 	esac 
 	
 	case "$1" in
-		pull) shift; local SRC="$dest/./" DEST="$src" 
+		pull) shift; echo "$dest =========> $USER@$HOST"
+			local SRC="$dest/./" DEST="$src" 
 			;;
-		push) shift; local SRC="$src/./" DEST="$dest" 
+		push) shift; echo "$USER@$HOST =========> $dest"
+			local SRC="$src/./" DEST="$dest" 
 			;; # Syncing it back
 		*) die "Usage: $PROGRAM $COMMAND [local] pull|push [RSYNCOPTIONS]"  ;;
 	esac

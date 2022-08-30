@@ -26,7 +26,7 @@ cd rsync-script/
 ```
 
 Configure file `rsync-script.sh` to fit particular environment. Mainly variables `RS_USER` and `RS_HOST`  (see below CUSTOMIZATION)
-Then only execute `make install`.
+Then only execute following command.
 
 ```
 make install
@@ -34,6 +34,7 @@ make install
 
 ## Customization 
 
+Variables `RS_USER` and `RS_HOST` are remote side.
 The script provides section `CUSTOMIZABLE SCRIPT VARIABLES` where variables can be modified to a particular needs of each user.
 Most of the variables should work right from the start.
 The only variables to take care of are environment variable `RS_USER` and `RS_HOST`.
