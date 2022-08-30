@@ -118,7 +118,7 @@ cmd_tmp(){
 
 	{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift;
 	
-	rsync_individual "--mkpath $@" "$prefix$src" "$TMP_DIR$src"
+	rsync_func "--mkpath $@" "$prefix$src" "$TMP_DIR$src"
 
 
 }
@@ -132,7 +132,7 @@ cmd_ls(){
 		{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift
 	fi
 
-	rsync_without_args "$@" "$prefix$src" "" 
+	rsync_func "$@" "$prefix$src" "" 
 
 }
 
