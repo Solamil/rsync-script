@@ -17,6 +17,9 @@ RSYNC_GLOBAL_FILTER=( --filter="merge $GLOBAL_FILTER" )
 USER=$(whoami)
 HOST="$(cat /etc/hostname)"
 
+HARDRIVE="/media/$USER/HardDrive"
+EXTDRIVE="/media/$USER/ExtDrive" 
+
 INDIVIDUAL_OPTS=( -tvupE )
 HOME_OPTS=( -rtuvpERFH --links )
 MEDIA_OPTS=( -rtvpRF --ignore-existing )
@@ -95,19 +98,20 @@ cmd_usage(){
 	echo
 	cat <<-_EOF
 	Usage: 	$PROGRAM home [local] pull|push [RSYNCOPTIONS]
-	                Transfer specified in rsync_dirs() function.
-		$PROGRAM media [local] pull|push [RSYNCOPTIONS]
-	                Transfer specified in rsync_media() function.
+	                Transfer files in $HOME directory, considering rsync filters.
+	        $PROGRAM media [local] pull|push [RSYNCOPTIONS]
+	                Transfer files in MEDIA directory.
+	                Media directories are defined by variables HARDRIVE, EXTDRIVE.
 	        $PROGRAM ls [DIR] [RSYNCOPTIONS]
 	        	List directory contents on remote host.
 	        $PROGRAM diff FILE [RSYNCOPTIONS]
 	        	Show diff between local and remote FILE.		
-		$PROGRAM FILE|DIR [DEST] pull|push [RSYNCOPTIONS]
-			Transfer specified FILE or DIR.
-		$PROGRAM host [remote_user] [remote_host]
-			Print content of variables RS_USER and RS_HOST and optionally set these variables. 
-		$PROGRAM config host remote_user [remote_host]
-			Set variables RS_USER and RS_HOST in config file.
+	        $PROGRAM FILE|DIR [DEST] pull|push [RSYNCOPTIONS]
+	                Transfer specified FILE or DIR.
+	        $PROGRAM host [remote_user] [remote_host]
+	                Print content of variables RS_USER and RS_HOST and optionally set these variables. 
+	        $PROGRAM config host remote_user [remote_host]
+	                Set variables RS_USER and RS_HOST in config file.
 	        $PROGRAM help
 	        	Show this help text.
 	        $PROGRAM version
@@ -167,13 +171,11 @@ cmd_home(){
 cmd_media(){
 	set_prefix
 
-	hardrive="/media/$USER/HardDrive"
-	extdrive="/media/$USER/ExtDrive" 
-	local src=$hardrive 
-	local dest=$prefix$hardrive
+	local src=$HARDRIVE 
+	local dest=$prefix$HARDRIVE
 
 	case "$1" in
-		portable) shift; dest=$extdrive
+		portable) shift; dest=$EXTDRIVE
 			;;
 	esac 
 	
@@ -194,7 +196,7 @@ cmd_individual(){
 
 
 	COMMAND="FILE"
-	echo "$@"
+
 	{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1";
 	[[ -d $src ]] && { echo "$1" | grep -vq "/$"; } && src=$src"/"
 	shift
@@ -235,6 +237,9 @@ cmd_host(){
 	echo "---------------------"
 }
 
+PROGRAM="${0##*/}"
+COMMAND="$1"
+
 # Further personal customization in the script file,
 # without "make install" all over again
 
@@ -243,8 +248,6 @@ cmd_host(){
 # END subcommand section    
 #
 
-PROGRAM="${0##*/}"
-COMMAND="$1"
 
 case "$1" in
  	version|--version) shift; cmd_version "$@" ;;

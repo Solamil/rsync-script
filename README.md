@@ -48,7 +48,7 @@ Whole new behavior can be overriden or set in `$HOME/.config/rsync/rsrc`.
 Usage: 	rs home [local] pull|push [RSYNCOPTIONS]
 		Transfer files in $HOME directory, considering rsync filters.
 	rs media [local] pull|push [RSYNCOPTIONS]
-		Transfer specified in rsync_media() function.
+		Media directories is defined by variables HARDRIVE, EXTDRIVE.
 	rs ls [DIR] [RSYNCOPTIONS]
 		List directory contents on remote host.
 	rs diff FILE [RSYNCOPTIONS]
