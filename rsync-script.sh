@@ -194,33 +194,42 @@ cmd_media(){
 cmd_individual(){
 	[[ $# -eq 0 ]] && { cmd_usage; exit 0; }
 
-
 	COMMAND="FILE"
-
-	{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1";
-	[[ -d $src ]] && { echo "$1" | grep -vq "/$"; } && src=$src"/"
-	shift
-
 	set_prefix
-		
-	if ! [[ $1 =~ pull|push ]]; then
-		{ echo "$1" | grep -q "^/"; } && dest="$1" || dest="$(pwd)/$1";
-		shift
-	else
-		dest=$src	
-	fi
 
 	case "$1" in
-		pull) shift; echo "$RS_USER@$RS_HOST =========> $USER@$HOST"
-			local SRC="$prefix$src" DEST="$dest" 
+		pull) 	local SRC="$prefix$(pwd)/" DEST="$(pwd)/" files=( --files-from="-" )
+			shift ;;
+		push)	local SRC="$(pwd)/" DEST="$prefix$(pwd)/" files=( --files-from="-" )
+			shift ;;
+		*)	
+			{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1";
+			[[ -d $src ]] && { echo "$1" | grep -vq "/$"; } && src=$src"/"
+			shift
+
+			if ! [[ $1 =~ pull|push ]]; then
+				{ echo "$1" | grep -q "^/"; } && dest="$1" || dest="$(pwd)/$1";
+				shift
+			else
+				dest=$src	
+			fi
+
+			case "$1" in
+				pull) shift; echo "$RS_USER@$RS_HOST =========> $USER@$HOST"
+					local SRC="$prefix$src" DEST="$dest" 
+					;;
+				push) shift; echo "$USER@$HOST =========> $RS_USER@$RS_HOST"
+					local SRC="$src" DEST="$prefix$dest"
+					;;
+				*) die "Usage: $PROGRAM [$COMMAND] [DEST] pull|push [RSYNCOPTIONS]"  
+					;;
+			esac
 			;;
-		push) shift; echo "$USER@$HOST =========> $RS_USER@$RS_HOST"
-			local SRC="$src" DEST="$prefix$dest"
-			;;
-		*) die "Usage: $PROGRAM $COMMAND [DEST] pull|push [RSYNCOPTIONS]"  ;;
 	esac
 
-	rsync_func "$@" ${INDIVIDUAL_OPTS[@]} $SRC $DEST
+
+		
+	rsync_func "$@" ${INDIVIDUAL_OPTS[@]} ${files[@]} $SRC $DEST
 }
 
 cmd_config(){
