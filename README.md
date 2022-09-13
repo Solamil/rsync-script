@@ -51,14 +51,9 @@ Usage: 	rs home [local] pull|push [RSYNCOPTIONS]
 		Media directories is defined by variables HARDRIVE, EXTDRIVE.
 	rs ls [DIR] [RSYNCOPTIONS]
 		List directory contents on remote host.
-	rs diff FILE [RSYNCOPTIONS]
-		Show diff between local and remote FILE.		
-	rs FILE|DIR pull|push [RSYNCOPTIONS]
+	rs [FILE|DIR] [DEST] pull|push [RSYNCOPTIONS]
 		Transfer specified FILE or DIR.
-	rs host [remote_user] [remote_host]
-		Print content of variables RS_USER and RS_HOST and optionally set these variables. 
-	rs config host remote_user [remote_host] 
-		Set variables RS_USER and RS_HOST in config file.
+		If no file is specified then program reads from stdin.
 	rs help
 		Show this help text.
 	rs version
@@ -69,15 +64,13 @@ Usage: 	rs home [local] pull|push [RSYNCOPTIONS]
 ## Simple examples
 
  - `rs ls .` - Print out list of files in a current directory(`.`) on remote host. If it exist on remote host. It is much like `ls -la` on local machine.
- - `rs diff compare.txt` - Print out differences between local `compare.txt` and remote one.
- - `rs home pull --dry-run` - Find candidates(`--dry-run` - rsync option) for pulling files and directories defined in `$HOME` directory.
- - `rs dir/ push -r` - Push directory and its content (`-r`) to remote host. Directory is defined with relative path.
+ - `rs home pull -n` - Find candidates(`-n, --dry-run`, rsync option) for pulling files and directories defined in `$HOME` directory.
+ - `rs dir/ push -r` - Push directory and its content (`-r, --recursive`, rsync-option) to remote host. Directory is defined with relative path.
  - `rs path/to/file/test.txt pathtofile/ push` - Transfer `test.txt` from directory `path/to/file/` to directory `pathtofile/` on a remote side.
 
 ## Dependencies
 
  - `rsync`, `ssh` - transfers files, default transfer over ssh
- - `diff` - compares content of two files
 
 ## Author
 

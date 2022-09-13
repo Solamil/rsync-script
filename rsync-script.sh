@@ -7,15 +7,16 @@ RSYNC="rsync"
 RSYNC_DEFAULT_OPTS=( --human-readable --progress --itemize-changes )
 RSYNC_COMPRESSION=( --compress --compress-choice=zstd --compress-level=22 )
 RSYNC_RSH=( "ssh -T -o Compression=no -x" )
-# RSYNC_OPTS=( --recursive --times --update --verbose  ) # not in use
 RS_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/rsync"
-GLOBAL_FILTER="$RS_DIR/global-filter"
 TMP_DIR="/tmp"
-RSYNC_GLOBAL_FILTER=( --filter="merge $GLOBAL_FILTER" )
 
 # Local side
 USER=$(whoami)
 HOST="$(cat /etc/hostname)"
+
+# Remote side
+RS_USER="${RS_USER:-}"
+RS_HOST="${RS_HOST:-}"
 
 HARDRIVE="/media/$USER/HardDrive"
 EXTDRIVE="/media/$USER/ExtDrive" 
@@ -24,9 +25,6 @@ INDIVIDUAL_OPTS=( -tvupE )
 HOME_OPTS=( -rtuvpERFH --links )
 MEDIA_OPTS=( -rtvpRF --ignore-existing )
 
-# Remote side
-RS_USER="${RS_USER:-}"
-RS_HOST="${RS_HOST:-}"
 
 
 #
@@ -42,24 +40,7 @@ die(){
 }
 set_prefix(){ prefix="$RS_USER@$RS_HOST:"; }
 
-set_host(){
-	sed -i "s/^RS_USER=.*/RS_USER=\"$1\"/" $RS_DIR/rsrc
-	RS_USER=$1
-	if [[ -n "$2" ]]; then
-		[[ $HOST == "$2" ]] && die "Error: The name \"$2\" for remote host is identical as for localhost." 
-		sed -i "s/^RS_HOST=.*/RS_HOST=\"$2\"/" $RS_DIR/rsrc
-		RS_HOST=$2
-	fi
-}
 
-diff_files(){
-	prefix=$1	 
-	remote_files=$(find $TMP_DIR$prefix -name "*" -type f)
-	for i in $remote_files; do
-		file=${i#$TMP_DIR}
-		diff --color=auto "$i" "$file"
-	done
-}
 #
 # END platform definable
 #
@@ -104,30 +85,15 @@ cmd_usage(){
 	                Media directories are defined by variables HARDRIVE, EXTDRIVE.
 	        $PROGRAM ls [DIR] [RSYNCOPTIONS]
 	        	List directory contents on remote host.
-	        $PROGRAM diff FILE [RSYNCOPTIONS]
-	        	Show diff between local and remote FILE.		
-	        $PROGRAM FILE|DIR [DEST] pull|push [RSYNCOPTIONS]
+	        $PROGRAM [FILE|DIR] [DEST] pull|push [RSYNCOPTIONS]
 	                Transfer specified FILE or DIR.
-	        $PROGRAM host [remote_user] [remote_host]
-	                Print content of variables RS_USER and RS_HOST and optionally set these variables. 
-	        $PROGRAM config host remote_user [remote_host]
-	                Set variables RS_USER and RS_HOST in config file.
+			If no file is specified then program reads from stdin.
 	        $PROGRAM help
 	        	Show this help text.
 	        $PROGRAM version
 	        	Show version information.
 
 	_EOF
-}
-
-cmd_tmp(){
-	set_prefix
-	
-	{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift;
-	echo "$prefix =========> $USER@$HOST"
-	rsync_func "--mkpath $@" "$prefix$src" "$TMP_DIR$src"
-	
-
 }
 
 cmd_ls(){
@@ -142,12 +108,6 @@ cmd_ls(){
 	rsync_func "$@" "$prefix$src" "" 
 
 }
-
-cmd_diff(){
-	cmd_tmp "$@"
-	diff --color=always "$src" "$TMP_DIR$src"
-}
-
 
 cmd_home(){
 	case "$1" in
@@ -232,20 +192,6 @@ cmd_individual(){
 	rsync_func "$@" ${INDIVIDUAL_OPTS[@]} ${files[@]} $SRC $DEST
 }
 
-cmd_config(){
-	case "$1" in
-		host) shift; set_host "$@" ;;
-		*) die "Usage: $PROGRAM $COMMAND host remote_user [remote_host]"
-	esac
-}
-
-cmd_host(){
-	[[ $# -gt 0 ]] && set_host "$@"
-	echo "Remote user: $RS_USER"
-	echo "Remote host: $RS_HOST"
-	echo "---------------------"
-}
-
 PROGRAM="${0##*/}"
 COMMAND="$1"
 
@@ -261,13 +207,9 @@ COMMAND="$1"
 case "$1" in
  	version|--version) shift; cmd_version "$@" ;;
  	help|--help) shift; cmd_usage "$@" ;;
-	diff) shift; cmd_diff "$@" ;;
 	"ls") shift; cmd_ls "$@" ;;
 	home) shift; cmd_home "$@" ;;
 	media) shift; cmd_media "$@" ;;
-	host) shift; cmd_host "$@" ;;
-	config) shift; cmd_config "$@" ;;
-	host) shift; cmd_host "$@" ;;
 	*) cmd_individual "$@" ;;
 	
 esac
