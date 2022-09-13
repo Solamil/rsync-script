@@ -78,16 +78,16 @@ cmd_usage(){
 	cmd_version
 	echo
 	cat <<-_EOF
-	Usage: 	$PROGRAM home [local] pull|push [RSYNCOPTIONS]
+	Usage: 	$PROGRAM [FILE|DIR] [DEST] pull|push [RSYNCOPTIONS]
+	                Transfer specified FILE or DIR.
+			If no file is specified then program reads from stdin.
+	        $PROGRAM home [local] pull|push [RSYNCOPTIONS]
 	                Transfer files in $HOME directory, considering rsync filters.
 	        $PROGRAM media [local] pull|push [RSYNCOPTIONS]
 	                Transfer files in MEDIA directory.
 	                Media directories are defined by variables HARDRIVE, EXTDRIVE.
 	        $PROGRAM ls [DIR] [RSYNCOPTIONS]
 	        	List directory contents on remote host.
-	        $PROGRAM [FILE|DIR] [DEST] pull|push [RSYNCOPTIONS]
-	                Transfer specified FILE or DIR.
-			If no file is specified then program reads from stdin.
 	        $PROGRAM help
 	        	Show this help text.
 	        $PROGRAM version

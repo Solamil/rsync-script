@@ -8,7 +8,6 @@ In order to use rsync effectively and quickly on daily basis, helper script `rsy
 This script allows to `push` or `pull` changes or new directories and files to or from remote host.
 The same logic as used in git repositories.
 
-The script comes with an option to compare two files by `diff` command between local and remote one.
 Additional options for rsync can be append to the command. 
 
 ## Use cases
