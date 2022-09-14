@@ -7,7 +7,7 @@ RSYNC="rsync"
 RSYNC_DEFAULT_OPTS=( --human-readable --progress --itemize-changes )
 RSYNC_COMPRESSION=( --compress --compress-choice=zstd --compress-level=22 )
 RSYNC_RSH=( "ssh -T -o Compression=no -x" )
-RS_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/rsync"
+RS_DIR="${RS_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}}/rsync"
 TMP_DIR="/tmp"
 
 # Local side
