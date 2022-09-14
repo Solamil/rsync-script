@@ -152,7 +152,7 @@ cmd_media(){
 }
 
 cmd_individual(){
-	[[ $# -eq 0 ]] && { cmd_usage; exit 0; }
+	[[ $# -eq 0 ]] && { cmd_ls; exit 0; }
 
 	COMMAND="FILE"
 	set_prefix
