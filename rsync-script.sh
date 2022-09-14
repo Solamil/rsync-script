@@ -18,8 +18,9 @@ HOST="$(cat /etc/hostname)"
 RS_USER="${RS_USER:-}"
 RS_HOST="${RS_HOST:-}"
 
-HARDRIVE="/media/$USER/HardDrive"
-EXTDRIVE="/media/$USER/ExtDrive" 
+MEDIA_DIR=""
+PORTABLE="" 
+PORTABLE_HOME=""
 
 INDIVIDUAL_OPTS=( -tvupE )
 HOME_OPTS=( -rtuvpERFH --links )
@@ -85,7 +86,7 @@ cmd_usage(){
 	                Transfer files in $HOME directory, considering rsync filters.
 	        $PROGRAM media [local] pull|push [RSYNCOPTIONS]
 	                Transfer files in MEDIA directory.
-	                Media directories are defined by variables HARDRIVE, EXTDRIVE.
+	                Media directories are defined by variables MEDIA_DIR, PORTABLE.
 	        $PROGRAM ls [DIR] [RSYNCOPTIONS]
 	        	List directory contents on remote host.
 	        $PROGRAM help
@@ -111,7 +112,7 @@ cmd_ls(){
 
 cmd_home(){
 	case "$1" in
-		portable) shift; prefix="$HOME/flashdrive/portable-home" ;;
+		portable) shift; prefix=$PORTABLE_HOME ;;
 		*) set_prefix ;;
 	esac 
 
@@ -131,11 +132,11 @@ cmd_home(){
 cmd_media(){
 	set_prefix
 
-	local src=$HARDRIVE 
-	local dest=$prefix$HARDRIVE
+	local src=$MEDIA_DIR
+	local dest=$prefix$MEDIA_DIR
 
 	case "$1" in
-		portable) shift; dest=$EXTDRIVE
+		portable) shift; dest=$PORTABLE
 			;;
 	esac 
 	
