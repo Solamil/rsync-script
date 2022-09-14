@@ -1,0 +1,139 @@
+.TH RS 1 rsync-script
+.SH NAME
+rs \- rsync shell script \-  transfer files and directories
+.SH SYNOPSIS
+
+Command:
+.B rs
+.I COMMAND
+[
+.I OPTIONS
+]
+.I pull|push
+[
+.I RSYNCOPTIONS
+] 
+
+Files from command line:
+.B rs
+.I FILE|DIR
+[
+.I DEST
+]
+.I pull|push
+[
+.I RSYNCOPTIONS
+]
+
+Files from stdin:
+.B rs
+.I pull|push
+[
+.I RSYNCOPTIONS
+]
+
+List directory contents on remote side:
+.B rs
+.I ls
+[
+.I DIR
+] [
+.I RSYNCOPTIONS
+]
+
+
+.SH DESCRIPTION
+.B rs
+is a shell script for transfer files and directories remotely and locally via 
+.BR rsync (1)
+command.
+The primary purpose of this script is to sync files between two devices.
+.BR rsync (1)
+is very versatile tool with a lot of options.
+Things get complicated with other passing options to rsync in a command line.
+Basic of this script is to sync local or remote side by using options \fIpull\fP or \fIpush\fP.
+The same logic as in git repositories.
+The default transfer is over
+.BR ssh (1)
+connection.
+
+Pull - remote side -------> local side
+
+Push - local side -------> remote side
+
+			flow of files
+
+Default beheavior of 
+.B rs
+itself is to print contents of directory on remote side just as 
+.BR ls (1)
+on local side.
+\fIRSYNCOPTIONS\fP are passed to 
+.BR rsync (1)
+as-is.
+
+It is a good practice before first run to put on the end of line rsync option \fI--dry-run\fP or \fI-n\fP to perform trial run that doesn't make any changes and provide the same or similiar output as real run.
+.SH COMMANDS
+.TP
+\fBhome\fP [ \fIlocal\fP ] pull|push [ \fIRSYNCOPTIONS\fP ]
+Sync files in \fIHOME\fP directory. The command considers of using filters to get rid of useless files(cache dir, temporary files...).
+If \fIlocal\fP is specified, transfer files to destination \fIPORTABLE_HOME\fP directory.
+Note: see documentation for more information about filters 
+.BR rsync (1) 
+\fBFILTER RULES SECTION\fP.
+
+.TP
+\fBmedia\fP [ \fIlocal\fP ] pull|push [ \fIRSYNCOPTIONS\fP ]
+Sync files in \fIMEDIA_DIR\fP directory.
+If \fIlocal\fP is specified, transfer files to a local destination defined by a variable \fIPORTABLE\fP.
+.TP
+\fBls\fP [ \fIDIR\fP ] [ \fIRSYNCOPTIONS\fP ]
+List directory contents on remote side defined by variable RS_USER and RS_HOST just as
+.BR ls (1)
+on local side.
+If no DIR is specified, use current directory on local side.
+This command is a default beheavior if number of arguments for the script is zero.
+.TP
+\fBhelp\fP
+Show help text.
+.TP
+\fBversion\fP
+Show version information.
+
+.SH OTHER FUNCTIONALITIES
+.TP
+\fBpull|push\fP [ \fIRSYNCOPTIONS\fP ]
+Transfer files from stdin to a current directory on a remote side.
+.TP
+\fBFILE|DIR\fP [ \fIDEST\fP ] pull|push [ \fIRSYNCOPTIONS\fP ]
+Transfer \fIFILE\fP or \fIDIR\fP to a current directory on a remote side.
+If \fIDEST\fP is specified, do not use current directory but instead use \fIDEST\fP on the remote side.
+
+.SH FILES
+.B $HOME/.config/rsync/rsrc
+The default configuration file.
+It can be used for adding more functionalities, overrides variables and functions.
+Configuration file has a biggest priority in terms of overriding variables, 
+second are ENVIRONMENT VARIABLES. The least priority has the script file itself.
+
+.SH ENVIRONMENT VARIABLES
+.TP
+.I RS_USER
+Overrides the remote user defined in the script
+.TP
+.I RS_HOST
+Overrides the remote host defined in the script
+.TP
+.I RS_DIR
+Overrides the default configuration directory.
+
+.SH AUTHOR
+.TP
+Written by Michal Kukla <michal@michalkukla.xyz> 2021-.
+.SH LICENSE
+.TP
+GPLv3
+
+.SH SEE ALSO
+.BR rsync (1),
+.BR ssh (1)
