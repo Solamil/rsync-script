@@ -76,22 +76,24 @@ It is a good practice before first run to put on the end of line rsync option \f
 .SH COMMANDS
 .TP
 \fBhome\fP [ \fIlocal\fP ] pull|push [ \fIRSYNCOPTIONS\fP ]
-Sync files in \fIHOME\fP directory. The command considers of using filters to get rid of useless files(cache dir, temporary files...).
+Sync files in \fIHOME\fP directory. The command considers of using filters to get rid of unnecessary files(cache dir, temporary files...).
 If \fIlocal\fP is specified, transfer files to destination \fIPORTABLE_HOME\fP directory.
 Note: see documentation for more information about filters 
 .BR rsync (1) 
 \fBFILTER RULES SECTION\fP.
+Default rsync options for this command are set in \fIHOME_OPTS\fP .
 
 .TP
 \fBmedia\fP [ \fIlocal\fP ] pull|push [ \fIRSYNCOPTIONS\fP ]
 Sync files in \fIMEDIA_DIR\fP directory.
 If \fIlocal\fP is specified, transfer files to a local destination defined by a variable \fIPORTABLE\fP.
+Default rsync options for this command are set in \fIMEDIA_OPTS\fP .
 .TP
 \fBls\fP [ \fIDIR\fP ] [ \fIRSYNCOPTIONS\fP ]
-List directory contents on remote side defined by variable RS_USER and RS_HOST just as
+List directory contents on remote side defined by variable \fIRS_USER\fP and \fIRS_HOST\fP just as
 .BR ls (1)
 on local side.
-If no DIR is specified, use current directory on local side.
+If \fIDIR\fP is specified, do not use current directory but instead use \fIDIR\fP.
 This command is a default beheavior if number of arguments for the script is zero.
 .TP
 \fBhelp\fP
