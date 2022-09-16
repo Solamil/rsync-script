@@ -113,7 +113,7 @@ cmd_ls(){
 
 cmd_home(){
 	case "$1" in
-		portable) shift; prefix=$PORTABLE_HOME ;;
+		local) shift; prefix=$PORTABLE_HOME ;;
 		*) set_prefix ;;
 	esac 
 
@@ -137,7 +137,7 @@ cmd_media(){
 	local dest=$prefix$MEDIA_DIR
 
 	case "$1" in
-		portable) shift; dest=$PORTABLE
+		local) shift; dest=$PORTABLE
 			;;
 	esac 
 	
