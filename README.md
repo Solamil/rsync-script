@@ -51,7 +51,8 @@ Usage: 	rs home [local] pull|push [RSYNCOPTIONS]
 		List directory contents on remote host.
 	rs [FILE|DIR] [DEST] pull|push [RSYNCOPTIONS]
 		Sync specified FILE or DIR.
-		If no file is specified then program reads from stdin.
+	rs - [DEST] pull|push [RSYNCOPTIONS]
+		Sync files from stdin in current directory.	
 	rs help
 		Show this help text.
 	rs version

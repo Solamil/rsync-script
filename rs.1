@@ -1,6 +1,6 @@
 .TH RS 1 rsync-script
 .SH NAME
-rs \- rsync shell script \-  transfer files and directories
+rs \- rsync shell script \-  transfer and sync files and directories
 .SH SYNOPSIS
 
 Command:
@@ -89,6 +89,11 @@ Sync files in \fIMEDIA_DIR\fP directory.
 If \fIlocal\fP is specified, transfer files to a local destination defined by a variable \fIPORTABLE\fP.
 Default rsync options for this command are set in \fIMEDIA_OPTS\fP .
 .TP
+\fB-\fP [ \fIDEST\fP ] pull|push [ \fIRSYNCOPTIONS\fP ]
+Sync files from stdin to a current directory on a remote side.
+If DEST is specified, do not use current directory as destination directory but instead use
+DEST.
+.TP
 \fBls\fP [ \fIDIR\fP ] [ \fIRSYNCOPTIONS\fP ]
 List directory contents on remote side defined by variable \fIRS_USER\fP and \fIRS_HOST\fP just as
 .BR ls (1)
@@ -104,11 +109,8 @@ Show version information.
 
 .SH OTHER FUNCTIONALITIES
 .TP
-\fBpull|push\fP [ \fIRSYNCOPTIONS\fP ]
-Transfer files from stdin to a current directory on a remote side.
-.TP
 \fBFILE|DIR\fP [ \fIDEST\fP ] pull|push [ \fIRSYNCOPTIONS\fP ]
-Transfer \fIFILE\fP or \fIDIR\fP to a current directory on a remote side.
+Sync \fIFILE\fP or \fIDIR\fP to a current directory on a remote side.
 If \fIDEST\fP is specified, do not use current directory but instead use \fIDEST\fP on the remote side.
 
 .SH FILES

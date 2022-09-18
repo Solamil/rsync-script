@@ -153,45 +153,58 @@ cmd_media(){
 	rsync_func "$@" ${MEDIA_OPTS[@]}  $SRC $DEST
 }
 
+cmd_stdin(){
+
+	set_prefix
+	echo "hello"
+	if ! [[ $1 =~ pull|push ]]; then
+		{ echo "$1" | grep -q "^/"; } && dest="$1" || dest="$(pwd)/$1";
+		shift
+	else
+		dest="$(pwd)/"
+	fi
+
+	case "$1" in
+		pull) shift; local SRC="$prefix$(pwd)/" DEST=$dest files=( --files-from="-" )
+			;;
+		push) shift; local SRC=$dest DEST="$prefix$(pwd)/" files=( --files-from="-" )
+			;;
+	esac
+
+	rsync_func "$@" ${INDIVIDUAL_OPTS[@]} ${files[@]} $SRC $DEST
+}
+
 cmd_individual(){
 	[[ $# -eq 0 ]] && { cmd_ls; exit 0; }
 
 	COMMAND="FILE"
 	set_prefix
+	
+	{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1";
+	[[ -d $src ]] && { echo "$1" | grep -vq "/$"; } && src=$src"/"
+	shift
+
+	if ! [[ $1 =~ pull|push ]]; then
+		{ echo "$1" | grep -q "^/"; } && dest="$1" || dest="$(pwd)/$1";
+		shift
+	else
+		dest=$src	
+	fi
 
 	case "$1" in
-		pull) 	local SRC="$prefix$(pwd)/" DEST="$(pwd)/" files=( --files-from="-" )
-			shift ;;
-		push)	local SRC="$(pwd)/" DEST="$prefix$(pwd)/" files=( --files-from="-" )
-			shift ;;
-		*)	
-			{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1";
-			[[ -d $src ]] && { echo "$1" | grep -vq "/$"; } && src=$src"/"
-			shift
-
-			if ! [[ $1 =~ pull|push ]]; then
-				{ echo "$1" | grep -q "^/"; } && dest="$1" || dest="$(pwd)/$1";
-				shift
-			else
-				dest=$src	
-			fi
-
-			case "$1" in
-				pull) shift; echo "$RS_USER@$RS_HOST =========> $USER@$HOST"
-					local SRC="$prefix$src" DEST="$dest" 
-					;;
-				push) shift; echo "$USER@$HOST =========> $RS_USER@$RS_HOST"
-					local SRC="$src" DEST="$prefix$dest"
-					;;
-				*) die "Usage: $PROGRAM [$COMMAND] [DEST] pull|push [RSYNCOPTIONS]"  
-					;;
-			esac
+		pull) shift; echo "$RS_USER@$RS_HOST =========> $USER@$HOST"
+			local SRC="$prefix$src" DEST="$dest" 
+			;;
+		push) shift; echo "$USER@$HOST =========> $RS_USER@$RS_HOST"
+			local SRC="$src" DEST="$prefix$dest"
+			;;
+		*) die "Usage: $PROGRAM [$COMMAND] [DEST] pull|push [RSYNCOPTIONS]"  
 			;;
 	esac
 
 
 		
-	rsync_func "$@" ${INDIVIDUAL_OPTS[@]} ${files[@]} $SRC $DEST
+	rsync_func "$@" ${INDIVIDUAL_OPTS[@]} $SRC $DEST
 }
 
 PROGRAM="${0##*/}"
@@ -212,6 +225,7 @@ case "$1" in
 	"ls") shift; cmd_ls "$@" ;;
 	home) shift; cmd_home "$@" ;;
 	media) shift; cmd_media "$@" ;;
+	"-") shift; cmd_stdin "$@" ;;
 	*) cmd_individual "$@" ;;
 	
 esac
