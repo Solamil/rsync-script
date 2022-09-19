@@ -77,7 +77,8 @@ cmd_usage(){
 	cat <<-_EOF
 	Usage: 	$PROGRAM [FILE|DIR] [DEST] pull|push [RSYNCOPTIONS]
 	                Transfer specified FILE or DIR.
-	                If no file is specified then program reads from stdin.
+	        $PROGRAM - [DEST] pull|push [RSYNCOPTIONS]
+	                Read files from from stdin.
 	        $PROGRAM home [local] pull|push [RSYNCOPTIONS]
 	                Transfer files in $HOME directory, considering rsync filters.
 	        $PROGRAM media [local] pull|push [RSYNCOPTIONS]
