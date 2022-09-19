@@ -4,11 +4,7 @@
 #
 
 RSYNC="rsync"
-RSYNC_DEFAULT_OPTS=( --human-readable --progress --itemize-changes )
-RSYNC_COMPRESSION=( --compress --compress-choice=zstd --compress-level=22 )
-RSYNC_RSH=( "ssh -T -o Compression=no -x" )
 RS_DIR="${RS_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}}/rsync"
-TMP_DIR="/tmp"
 
 # Local side
 USER=$(whoami)
@@ -21,12 +17,6 @@ RS_HOST="${RS_HOST:-}"
 MEDIA_DIR=""
 PORTABLE="" 
 PORTABLE_HOME=""
-
-INDIVIDUAL_OPTS=( -tvupE )
-HOME_OPTS=( -rtuvpERFH --links )
-MEDIA_OPTS=( -rtvpRF --ignore-existing )
-
-
 
 #
 # END CUSTOMIZABLE SCRIPT VARIABLES 
@@ -51,8 +41,14 @@ set_prefix(){ prefix="$RS_USER@$RS_HOST:"; }
 #
 
 rsync_func(){
-	$RSYNC "${RSYNC_DEFAULT_OPTS[@]}" -e "${RSYNC_RSH[@]}" \
-	$@
+#	set -- --human-readable --progress --itemize-changes\
+#		-e "ssh -T -o Compression=no -x" "$@"
+
+	$RSYNC --human-readable --progress --itemize-changes \
+		-e "ssh -T -o Compression=no -x" \
+		"$@"
+#	$RSYNC "${RSYNC_DEFAULT_OPTS[*]}" -e "${RSYNC_RSH[*]}" \
+#	"$@"
 #	-rtvcpRE \
 }
 
@@ -101,7 +97,7 @@ cmd_usage(){
 cmd_ls(){
 	set_prefix
 
-	if [[ $# -eq 0 ]]; then
+	if [ $# -eq 0 ]; then
 		src="$(pwd)/." 
 	else 
 		{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift
@@ -119,22 +115,25 @@ cmd_home(){
 
 	case "$1" in
 		pull) shift; echo "$prefix =========> $USER@$HOST"
-			local SRC="$prefix$HOME/./" DEST="$HOME/"
+			SRC="$prefix$HOME/./" DEST="$HOME/"
 			;; 
 		push) shift; echo "$USER@$HOST =========> $prefix"
-			local SRC="$HOME/./" DEST="$prefix$HOME/" 
+			SRC="$HOME/./" DEST="$prefix$HOME/" 
 			;;
 		*) die "Usage: $PROGRAM $COMMAND pull|push [RSYNCOPTIONS]"  
 			;;
 	esac
-	rsync_func "$@" ${HOME_OPTS[@]} $SRC $DEST
+
+	rsync_func "$@" \
+		-rtuvpERFH --links \
+		"$SRC" "$DEST"
 }
 
 cmd_media(){
 	set_prefix
 
-	local src=$MEDIA_DIR
-	local dest=$prefix$MEDIA_DIR
+	src=$MEDIA_DIR
+	dest=$prefix$MEDIA_DIR
 
 	case "$1" in
 		local) shift; dest=$PORTABLE
@@ -143,20 +142,22 @@ cmd_media(){
 	
 	case "$1" in
 		pull) shift; echo "$dest =========> $USER@$HOST"
-			local SRC="$dest/./" DEST="$src" 
+			SRC="$dest/./" DEST="$src" 
 			;;
 		push) shift; echo "$USER@$HOST =========> $dest"
-			local SRC="$src/./" DEST="$dest" 
+			SRC="$src/./" DEST="$dest" 
 			;; # Syncing it back
 		*) die "Usage: $PROGRAM $COMMAND [local] pull|push [RSYNCOPTIONS]"  ;;
 	esac
-	rsync_func "$@" ${MEDIA_OPTS[@]}  $SRC $DEST
+
+	rsync_func "$@" \
+		-rtvpRF --ignore-existing \
+		"$SRC" "$DEST"
 }
 
 cmd_stdin(){
 
 	set_prefix
-	echo "hello"
 	if ! [[ $1 =~ pull|push ]]; then
 		{ echo "$1" | grep -q "^/"; } && dest="$1" || dest="$(pwd)/$1";
 		shift
@@ -165,23 +166,24 @@ cmd_stdin(){
 	fi
 
 	case "$1" in
-		pull) shift; local SRC="$prefix$(pwd)/" DEST=$dest files=( --files-from="-" )
+		pull) shift; SRC="$prefix$(pwd)/" DEST=$dest
 			;;
-		push) shift; local SRC=$dest DEST="$prefix$(pwd)/" files=( --files-from="-" )
+		push) shift; SRC=$dest DEST="$prefix$(pwd)/"
 			;;
 	esac
-
-	rsync_func "$@" ${INDIVIDUAL_OPTS[@]} ${files[@]} $SRC $DEST
+	rsync_func "$@" \
+		-tvupE \
+		"$SRC" "$DEST"
 }
 
 cmd_individual(){
-	[[ $# -eq 0 ]] && { cmd_ls; exit 0; }
+	[ $# -eq 0 ] && { cmd_ls; exit 0; }
 
 	COMMAND="FILE"
 	set_prefix
 	
 	{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1";
-	[[ -d $src ]] && { echo "$1" | grep -vq "/$"; } && src=$src"/"
+	[ -d "$src" ] && { echo "$1" | grep -vq "/$"; } && src=$src"/"
 	shift
 
 	if ! [[ $1 =~ pull|push ]]; then
@@ -193,18 +195,18 @@ cmd_individual(){
 
 	case "$1" in
 		pull) shift; echo "$RS_USER@$RS_HOST =========> $USER@$HOST"
-			local SRC="$prefix$src" DEST="$dest" 
+			SRC="$prefix$src" DEST="$dest" 
 			;;
 		push) shift; echo "$USER@$HOST =========> $RS_USER@$RS_HOST"
-			local SRC="$src" DEST="$prefix$dest"
+			SRC="$src" DEST="$prefix$dest"
 			;;
 		*) die "Usage: $PROGRAM [$COMMAND] [DEST] pull|push [RSYNCOPTIONS]"  
 			;;
 	esac
 
-
-		
-	rsync_func "$@" ${INDIVIDUAL_OPTS[@]} $SRC $DEST
+	rsync_func "$@" \
+		-tvupE \
+		"$SRC" "$DEST"
 }
 
 PROGRAM="${0##*/}"
@@ -213,7 +215,7 @@ COMMAND="$1"
 # Further personal customization in the script file,
 # without "make install" all over again
 
-[ -f $RS_DIR/rsrc ] && . $RS_DIR/rsrc
+[ -f "$RS_DIR/rsrc" ] && . $RS_DIR/rsrc
 #
 # END subcommand section    
 #
