@@ -159,7 +159,7 @@ cmd_media(){
 cmd_stdin(){
 
 	set_prefix
-	if ! [[ $1 =~ pull|push ]]; then
+	if [ "$1" != "pull" ] && [ "$1" != "push" ]; then
 		{ echo "$1" | grep -q "^/"; } && dest="$1" || dest="$(pwd)/$1";
 		shift
 	else
@@ -187,7 +187,7 @@ cmd_individual(){
 	[ -d "$src" ] && { echo "$1" | grep -vq "/$"; } && src=$src"/"
 	shift
 
-	if ! [[ $1 =~ pull|push ]]; then
+	if [ "$1" != "pull" ] && [ "$1" != "push" ]; then
 		{ echo "$1" | grep -q "^/"; } && dest="$1" || dest="$(pwd)/$1";
 		shift
 	else
