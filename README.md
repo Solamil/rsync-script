@@ -72,9 +72,6 @@ More information may be found in the rs(1) man page.
 
  - `rsync`, `ssh` - transfers files, default transfer over ssh
 
-## License
-
-
 ## Author
 
 Michal < michal@michalkukla.xyz >
