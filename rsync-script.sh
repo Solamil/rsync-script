@@ -99,7 +99,9 @@ cmd_ls(){
 	fi
 
 	echo "$USER@$HOST =========> $prefix"
-	rsync_func "$@" "$prefix$src" "" 
+	rsync_func "$@"  \
+		--list-only \
+		"$prefix$src" "" 
 
 }
 
