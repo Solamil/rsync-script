@@ -123,7 +123,8 @@ cmd_home(){
 	esac
 
 	rsync_func "$@" \
-		-rtupERFH --links \
+		--recursive --times --update --perms --executability \
+		--relative --filter="dir-merge /.rsync-filter" --hard-links --links \
 		"$SRC" "$DEST"
 }
 
@@ -149,7 +150,8 @@ cmd_media(){
 	esac
 
 	rsync_func "$@" \
-		-rtpRF --ignore-existing \
+		--recursive --times --perms --relative --ignore-existing \
+		--filter="- .rsync-filter" \
 		"$SRC" "$DEST"
 }
 
@@ -172,7 +174,7 @@ cmd_stdin(){
 		*) die "Usage: $PROGRAM $COMMAND [DEST] pull|push [RSYNCOPTIONS]"  ;;
 	esac
 	rsync_func "$@" \
-		-tupE \
+		--times --update --perms --executability \
 		"$SRC" "$DEST"
 }
 
@@ -208,7 +210,7 @@ cmd_individual(){
 	esac
 
 	rsync_func "$@" \
-		-tupE \
+		--times --update --perms --executability \
 		"$SRC" "$DEST"
 }
 
