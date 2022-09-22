@@ -41,15 +41,9 @@ set_prefix(){ prefix="$RS_USER@$RS_HOST:"; }
 #
 
 rsync_func(){
-#	set -- --human-readable --progress --itemize-changes\
-#		-e "ssh -T -o Compression=no -x" "$@"
-
 	$RSYNC --human-readable --progress --itemize-changes \
 		-e "ssh -T -o Compression=no -x" \
 		"$@"
-#	$RSYNC "${RSYNC_DEFAULT_OPTS[*]}" -e "${RSYNC_RSH[*]}" \
-#	"$@"
-#	-rtvcpRE \
 }
 
 
@@ -101,8 +95,9 @@ cmd_ls(){
 	if [ $# -eq 0 ]; then
 		src="$(pwd)/." 
 	else 
-		{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1"; shift
+		echo "$1" | grep -q "^/" && src="$1" || src="$(pwd)/$1"; shift
 	fi
+
 	echo "$USER@$HOST =========> $prefix"
 	rsync_func "$@" "$prefix$src" "" 
 
@@ -160,7 +155,8 @@ cmd_stdin(){
 
 	set_prefix
 	if [ "$1" != "pull" ] && [ "$1" != "push" ]; then
-		{ echo "$1" | grep -q "^/"; } && dest="$1" || dest="$(pwd)/$1";
+		echo "$1" | grep -q "^/" &&
+			dest="$1" || dest="$(pwd)/$1"
 		shift
 	else
 		dest="$(pwd)/"
@@ -171,6 +167,7 @@ cmd_stdin(){
 			;;
 		push) shift; SRC=$dest DEST="$prefix$(pwd)/"
 			;;
+		*) die "Usage: $PROGRAM $COMMAND [DEST] pull|push [RSYNCOPTIONS]"  ;;
 	esac
 	rsync_func "$@" \
 		-tvupE \
@@ -183,12 +180,15 @@ cmd_individual(){
 	COMMAND="FILE"
 	set_prefix
 	
-	{ echo "$1" | grep -q "^/"; } && src="$1" || src="$(pwd)/$1";
-	[ -d "$src" ] && { echo "$1" | grep -vq "/$"; } && src=$src"/"
+	echo "$1" | grep -q "^/" &&
+		src="$1" || src="$(pwd)/$1"
+	[ -d "$src" ] &&
+		echo "$1" | grep -vq "/$" && src=$src"/"
 	shift
 
 	if [ "$1" != "pull" ] && [ "$1" != "push" ]; then
-		{ echo "$1" | grep -q "^/"; } && dest="$1" || dest="$(pwd)/$1";
+		echo "$1" | grep -q "^/" &&
+			dest="$1" || dest="$(pwd)/$1";
 		shift
 	else
 		dest=$src	
@@ -216,7 +216,7 @@ COMMAND="$1"
 # Further personal customization in the script file,
 # without "make install" all over again
 
-[ -f "$RS_DIR/rsrc" ] && . $RS_DIR/rsrc
+[ -f "$RS_DIR/rsrc" ] && . "$RS_DIR"/rsrc
 #
 # END subcommand section    
 #
