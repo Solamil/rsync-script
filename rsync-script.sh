@@ -41,7 +41,7 @@ set_prefix(){ prefix="$RS_USER@$RS_HOST:"; }
 #
 
 rsync_func(){
-	$RSYNC --human-readable --progress --itemize-changes \
+	$RSYNC --human-readable --progress --itemize-changes --verbose \
 		-e "ssh -T -o Compression=no -x" \
 		"$@"
 }
@@ -98,7 +98,7 @@ cmd_ls(){
 		echo "$1" | grep -q "^/" && src="$1" || src="$(pwd)/$1"; shift
 	fi
 
-	echo "$USER@$HOST =========> $prefix"
+	echo "$prefix"
 	rsync_func "$@"  \
 		--list-only \
 		"$prefix$src" "" 
@@ -123,7 +123,7 @@ cmd_home(){
 	esac
 
 	rsync_func "$@" \
-		-rtuvpERFH --links \
+		-rtupERFH --links \
 		"$SRC" "$DEST"
 }
 
@@ -149,7 +149,7 @@ cmd_media(){
 	esac
 
 	rsync_func "$@" \
-		-rtvpRF --ignore-existing \
+		-rtpRF --ignore-existing \
 		"$SRC" "$DEST"
 }
 
@@ -172,7 +172,7 @@ cmd_stdin(){
 		*) die "Usage: $PROGRAM $COMMAND [DEST] pull|push [RSYNCOPTIONS]"  ;;
 	esac
 	rsync_func "$@" \
-		-tvupE \
+		-tupE \
 		"$SRC" "$DEST"
 }
 
@@ -208,7 +208,7 @@ cmd_individual(){
 	esac
 
 	rsync_func "$@" \
-		-tvupE \
+		-tupE \
 		"$SRC" "$DEST"
 }
 
