@@ -151,7 +151,7 @@ cmd_media(){
 
 	rsync_func "$@" \
 		--recursive --times --perms --relative --ignore-existing \
-		--filter="- .rsync-filter" \
+		--filter="dir-merge /.rsync-filter" \
 		"$SRC" "$DEST"
 }
 
