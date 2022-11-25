@@ -175,6 +175,7 @@ cmd_stdin(){
 	esac
 	rsync_func "$@" \
 		--times --update --perms --executability \
+		--files-from="-" \
 		"$SRC" "$DEST"
 }
 
