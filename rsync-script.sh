@@ -93,10 +93,9 @@ cmd_ls(){
 	set_prefix
 
 	if [ $# -eq 0 ]; then
-		src=$(readlink -f ".")
+		src="$(pwd)/." 
 	else 
-		src=$(readlink -f "$1")
-		shift
+		echo "$1" | grep -q "^/" && src="$1" || src="$(pwd)/$1"; shift
 	fi
 
 	echo "$prefix"
@@ -160,7 +159,8 @@ cmd_stdin(){
 
 	set_prefix
 	if [ "$1" != "pull" ] && [ "$1" != "push" ]; then
-		dest=$(readlink -f "$1")
+		echo "$1" | grep -q "^/" &&
+			dest="$1" || dest="$(pwd)/$1"
 		shift
 	else
 		dest="$(pwd)/"
@@ -184,14 +184,16 @@ cmd_individual(){
 
 	COMMAND="FILE"
 	set_prefix
-	src=$(readlink -f "$1")
-
-	[ -d "$src" ] && src=$src"/"
-		
+	
+	echo "$1" | grep -q "^/" &&
+		src="$1" || src="$(pwd)/$1"
+	[ -d "$src" ] &&
+		echo "$1" | grep -vq "/$" && src=$src"/"
 	shift
 
 	if [ "$1" != "pull" ] && [ "$1" != "push" ]; then
-		dest=$(readlink -f "$1")
+		echo "$1" | grep -q "^/" &&
+			dest="$1" || dest="$(pwd)/$1";
 		shift
 	else
 		dest=$src	
