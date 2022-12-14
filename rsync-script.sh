@@ -69,7 +69,7 @@ cmd_usage(){
 	cmd_version
 	echo
 	cat <<-_EOF
-	Usage: 	$PROGRAM [FILE|DIR] [DEST] pull|push [RSYNCOPTIONS]
+	Usage: 	$PROGRAM [FILE|DIR] [DEST] pull|push|local [RSYNCOPTIONS]
 	                Transfer specified FILE or DIR.
 	        $PROGRAM - [DEST] pull|push [RSYNCOPTIONS]
 	                Read files from from stdin.
@@ -187,8 +187,6 @@ cmd_individual(){
 	
 	echo "$1" | grep -q "^/" &&
 		src="$1" || src="$(pwd)/$1"
-	[ -d "$src" ] &&
-		echo "$1" | grep -vq "/$" && src=$src"/"
 	shift
 
 	if [ "$1" != "pull" ] && [ "$1" != "push" ]; then
@@ -205,6 +203,9 @@ cmd_individual(){
 			;;
 		push) shift; echo "$USER@$HOST =========> $RS_USER@$RS_HOST"
 			SRC="$src" DEST="$prefix$dest"
+			;;
+		local) shift; echo "$src ==========> $dest"
+			SRC="$src" DEST="$dest"
 			;;
 		*) die "Usage: $PROGRAM [$COMMAND] [DEST] pull|push [RSYNCOPTIONS]"  
 			;;
