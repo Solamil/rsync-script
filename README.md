@@ -1,6 +1,5 @@
 # Rsync helper script
-
-`rsync-script.sh` is a shell script for sync files and directories between local and remote host.
+Rs is a shell script with set of options for easier using rsync command on daily basis between two remote hosts or locally as well.
 The actual transfer is done by [rsync](https://github.com/WayneD/rsync), which is a command to transfer files between local and remote host. It also manages to transfer files locally.
 It is available in most of package managers.
 It provides a lot of options and features.
@@ -49,7 +48,7 @@ Usage: 	rs home [local] pull|push [RSYNCOPTIONS]
 		Sync MEDIA directories is defined by variables MEDIA_DIR, PORTABLE.
 	rs ls [DIR] [RSYNCOPTIONS]
 		List directory contents on remote host.
-	rs [FILE|DIR] [DEST] pull|push [RSYNCOPTIONS]
+	rs [FILE|DIR] [DEST] pull|push|local [RSYNCOPTIONS]
 		Sync specified FILE or DIR.
 	rs - [DEST] pull|push [RSYNCOPTIONS]
 		Sync files from stdin in current directory.	

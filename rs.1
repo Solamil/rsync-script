@@ -37,9 +37,9 @@ List directory contents on remote side:
 
 .SH DESCRIPTION
 .B rs
-is a shell script for transfer files and directories remotely and locally via 
+is a shell script with set of options for easier using 
 .BR rsync (1)
-command.
+command on daily basis between two remote hosts or locally as well.
 The primary purpose of this script is to sync files between two devices.
 .BR rsync (1)
 is very versatile tool with a lot of options.
@@ -69,8 +69,8 @@ It is a good practice before first run to put on the end of line rsync option \f
 .SH COMMANDS
 .TP
 \fBhome\fP [ \fIlocal\fP ] pull|push [ \fIRSYNCOPTIONS\fP ]
-Sync files in \fIHOME\fP directory. The command considers of using filters to get rid of unnecessary files(cache dir, temporary files...).
-If \fIlocal\fP is specified, transfer files to destination \fIPORTABLE_HOME\fP directory.
+Sync files in \fIHOME\fP directory. The command considers of using rsync filters to get rid of unnecessary files(cache dir, temporary files...).
+If \fIlocal\fP is specified, transfer files to a local destination defined by a variable \fIPORTABLE_HOME\fP .
 Note: see documentation for more information about filters 
 .BR rsync (1) 
 \fBFILTER RULES SECTION\fP.
@@ -100,16 +100,17 @@ Show version information.
 
 .SH OTHER FUNCTIONALITIES
 .TP
-\fBFILE|DIR\fP [ \fIDEST\fP ] pull|push [ \fIRSYNCOPTIONS\fP ]
+\fBFILE|DIR\fP [ \fIDEST\fP ] pull|push|local [ \fIRSYNCOPTIONS\fP ]
 Sync \fIFILE\fP or \fIDIR\fP to a current directory on a remote side.
 If \fIDEST\fP is specified, do not use current directory but instead use \fIDEST\fP on the remote side.
+If \fIlocal\fP is specified, do a transfer locally.
 
 .SH FILES
 .B $HOME/.config/rsync/rsrc
 The default configuration file.
 It can be used for adding more functionalities, overrides variables and functions.
-Configuration file has a biggest priority in terms of overriding variables, 
-second are ENVIRONMENT VARIABLES. The least priority has the script file itself.
+Configuration file has a top priority in terms of overriding variables, 
+right behind are ENVIRONMENT VARIABLES. The least priority has the script file itself.
 
 .SH ENVIRONMENT VARIABLES
 .TP
