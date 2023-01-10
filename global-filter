@@ -1,0 +1,40 @@
++ .rsync-filter
+
+- *.o
+- dont-sync/
+- node_modules/*
+
+# Libreoffice
+- .~lock.*
+
+# Tex build files
+- *.log
+- *.aux
+- *.out
+- *.4tc
+- *.xref
+- *.tmp
+- *.pyc
+- *.pyg
+- *.pyo
+- *.fls
+- *.vrb
+- *.fdb_latexmk
+# - *.bak
+- *.swp
+- *.synctex(busy)
+- *.lof
+- *.lot
+- *.maf
+- *.idx
+- *.mtc
+- *.mtc0
+- *.nav
+- *.out
+- *.snm
+- *.toc
+- *.bcf
+- *.run.xml
+- *.synctex.gz
+- *.blg
+- *.bbl
