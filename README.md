@@ -73,4 +73,4 @@ More information may be found in the rs(1) man page.
 
 ## Author
 
-Michal < michal@michalkukla.xyz >
+Solamil 
