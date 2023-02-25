@@ -150,8 +150,8 @@ cmd_media(){
 	esac
 
 	rsync_func "$@" \
-		--recursive --times --perms --relative --ignore-existing \
-		--filter="dir-merge /.rsync-filter" \
+		--recursive --times --perms --executability \
+		--relative --filter="dir-merge /.rsync-filter" --hard-links --links \
 		"$SRC" "$DEST"
 }
 
