@@ -207,7 +207,7 @@ cmd_individual(){
 		local) shift; echo "$src ==========> $dest"
 			SRC="$src" DEST="$dest"
 			;;
-		*) die "Usage: $PROGRAM [$COMMAND] [DEST] pull|push [RSYNCOPTIONS]"  
+		*) die "Usage: $PROGRAM [$COMMAND] [DEST] pull|push|local [RSYNCOPTIONS]"  
 			;;
 	esac
 
